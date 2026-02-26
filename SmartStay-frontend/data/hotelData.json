@@ -1,0 +1,380 @@
+{
+    "hotel": {
+      "name": "Hotel SmartStay",
+      "brandName": {
+        "smart": "Smart",
+        "stay": "Stay"
+      },
+      "tagline": "Welcome To",
+      "location": "Ahmedabad India",
+      "description": "Experience unparalleled luxury and comfort",
+      "heroDescription": "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quibusdam maxime praesentium. Why did the scarecrow win an award? Because he was outstanding in his field. Lorem ipsum",
+      "contact": {
+        "email": "contact@smartstay.com",
+        "phone": "+1 (555) 123-4567",
+        "address": "Ahmedabad, Gujarat, India",
+        "coordinates": {
+          "lat": 23.0225,
+          "lng": 72.5714
+        }
+      },
+      "checkInTime": "2:00 PM",
+      "checkOutTime": "11:00 AM",
+      "policies": {
+        "cancellation": "Free cancellation up to 24 hours before check-in",
+        "payment": "Full payment required at booking",
+        "idRequired": "Valid government ID at check-in"
+      },
+      "socialMedia": {
+        "facebook": "#facebook",
+        "twitter": "#twitter",
+        "linkedin": "#linkedin",
+        "instagram": "#instagram"
+      }
+    },
+    "about": {
+      "label": "About Us",
+      "sections": [
+        {
+          "title": "History of SmartStay",
+          "primaryText": "At Hotel SmartStay, we have been committed to providing exceptional hospitality for over 8 years. Our journey began with a simple mission: to create a welcoming space where guests feel at home while enjoying world-class amenities and services.",
+          "secondaryText": "From our humble beginnings, we have grown into one of Ahmedabad's most trusted hotel destinations, serving thousands of satisfied guests annually with warmth and dedication.",
+          "image": "https://images.unsplash.com/photo-1505691938895-1758d7feb511",
+          "imageAlt": "Modern hotel architecture"
+        },
+        {
+          "title": "Why Choose Us?",
+          "primaryText": "We stand out from the competition through our unwavering commitment to excellence. Our team goes the extra mile to ensure every guest receives personalized attention, cutting-edge technology, and exceptional service that exceeds expectations.",
+          "secondaryText": "With a strategic location, modern facilities, and highly trained staff, Hotel SmartStay offers the perfect blend of comfort, convenience, and luxury. We're not just a place to stay—we're your home away from home.",
+          "image": "https://images.unsplash.com/photo-1523217582562-09d0def993a6",
+          "imageAlt": "Luxury hotel interior"
+        }
+      ],
+      "statistics": [
+        {
+          "key": "years",
+          "value": 8,
+          "label": "Years of Service"
+        },
+        {
+          "key": "area",
+          "value": 459,
+          "label": "Sq. Meter Area"
+        },
+        {
+          "key": "rooms",
+          "value": 50,
+          "label": "Nice Rooms"
+        },
+        {
+          "key": "visitors",
+          "value": 3786,
+          "label": "Happy Visitors"
+        }
+      ]
+    },
+    "navigation": {
+      "links": [
+        {
+          "id": "home",
+          "label": "Home",
+          "href": "#home"
+        },
+        {
+          "id": "about",
+          "label": "About",
+          "href": "#about"
+        },
+        {
+          "id": "rooms",
+          "label": "Rooms",
+          "href": "#rooms"
+        },
+        {
+          "id": "services",
+          "label": "Services",
+          "href": "#services"
+        },
+        {
+          "id": "testimonials",
+          "label": "Contact",
+          "href": "#testimonials"
+        }
+      ]
+    },
+    "roomsSection": {
+      "title": "Our Rooms",
+      "description": "Choose from our selection of luxury rooms"
+    },
+    "rooms": [
+      {
+        "id": "executive-suite",
+        "name": "Executive Suite",
+        "price": "$299",
+        "basePrice": 299,
+        "image": "/executive-suite.png",
+        "description": "Spacious executive suite with premium amenities and stunning city views. Perfect for business travelers and those seeking extra comfort.",
+        "size": "45 sqm",
+        "bedType": "King Bed",
+        "maxGuests": 4,
+        "amenities": [
+          {
+            "label": "Free Wi-Fi",
+            "icon": "wifi"
+          },
+          {
+            "label": "Air Conditioning",
+            "icon": "ac"
+          },
+          {
+            "label": "Hot Water",
+            "icon": "water"
+          },
+          {
+            "label": "Smart TV",
+            "icon": "tv"
+          },
+          {
+            "label": "Mini Bar",
+            "icon": "minibar"
+          },
+          {
+            "label": "Room Service",
+            "icon": "service"
+          }
+        ],
+        "images": [
+          {
+            "type": "main",
+            "url": "/executive-suite.png",
+            "label": "Room View"
+          },
+          {
+            "type": "bed",
+            "url": "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85",
+            "label": "Bed View"
+          },
+          {
+            "type": "bathroom",
+            "url": "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14",
+            "label": "Bathroom"
+          },
+          {
+            "type": "balcony",
+            "url": "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688",
+            "label": "Balcony"
+          },
+          {
+            "type": "amenities",
+            "url": "https://images.unsplash.com/photo-1578683010236-d716f9a3f461",
+            "label": "Amenities"
+          }
+        ]
+      },
+      {
+        "id": "junior-suite",
+        "name": "Junior Suite",
+        "price": "$199",
+        "basePrice": 199,
+        "image": "/junior-suite-hotel-room.png",
+        "description": "Comfortable junior suite with modern amenities and elegant design. Ideal for couples and small families.",
+        "size": "35 sqm",
+        "bedType": "Queen Bed",
+        "maxGuests": 3,
+        "amenities": [
+          {
+            "label": "Free Wi-Fi",
+            "icon": "wifi"
+          },
+          {
+            "label": "Air Conditioning",
+            "icon": "ac"
+          },
+          {
+            "label": "Hot Water",
+            "icon": "water"
+          },
+          {
+            "label": "Smart TV",
+            "icon": "tv"
+          },
+          {
+            "label": "Coffee Maker",
+            "icon": "coffee"
+          },
+          {
+            "label": "Safe Box",
+            "icon": "safe"
+          }
+        ],
+        "images": [
+          {
+            "type": "main",
+            "url": "/junior-suite-hotel-room.png",
+            "label": "Room View"
+          },
+          {
+            "type": "bed",
+            "url": "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85",
+            "label": "Bed View"
+          },
+          {
+            "type": "bathroom",
+            "url": "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14",
+            "label": "Bathroom"
+          },
+          {
+            "type": "balcony",
+            "url": "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688",
+            "label": "Balcony"
+          },
+          {
+            "type": "amenities",
+            "url": "https://images.unsplash.com/photo-1578683010236-d716f9a3f461",
+            "label": "Amenities"
+          }
+        ]
+      },
+      {
+        "id": "deluxe-suite",
+        "name": "Super Deluxe Suite",
+        "price": "$399",
+        "basePrice": 399,
+        "image": "/super-deluxe-luxury-suite.jpg",
+        "description": "Ultimate luxury suite with premium furnishings, separate living area, and breathtaking panoramic views.",
+        "size": "60 sqm",
+        "bedType": "King Bed + Sofa Bed",
+        "maxGuests": 5,
+        "amenities": [
+          {
+            "label": "Free Wi-Fi",
+            "icon": "wifi"
+          },
+          {
+            "label": "Air Conditioning",
+            "icon": "ac"
+          },
+          {
+            "label": "Hot Water",
+            "icon": "water"
+          },
+          {
+            "label": "Smart TV",
+            "icon": "tv"
+          },
+          {
+            "label": "Mini Bar",
+            "icon": "minibar"
+          },
+          {
+            "label": "Room Service",
+            "icon": "service"
+          },
+          {
+            "label": "Jacuzzi",
+            "icon": "jacuzzi"
+          },
+          {
+            "label": "Butler Service",
+            "icon": "butler"
+          }
+        ],
+        "images": [
+          {
+            "type": "main",
+            "url": "/super-deluxe-luxury-suite.jpg",
+            "label": "Room View"
+          },
+          {
+            "type": "bed",
+            "url": "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85",
+            "label": "Bed View"
+          },
+          {
+            "type": "bathroom",
+            "url": "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14",
+            "label": "Bathroom"
+          },
+          {
+            "type": "balcony",
+            "url": "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688",
+            "label": "Balcony"
+          },
+          {
+            "type": "amenities",
+            "url": "https://images.unsplash.com/photo-1578683010236-d716f9a3f461",
+            "label": "Amenities"
+          }
+        ]
+      }
+    ],
+    "services": [
+      {
+        "id": "spa",
+        "name": "Spa & Wellness",
+        "description": "Rejuvenate your body and mind with our premium spa treatments",
+        "icon": "spa"
+      },
+      {
+        "id": "restaurant",
+        "name": "Fine Dining",
+        "description": "Experience culinary excellence at our award-winning restaurant",
+        "icon": "restaurant"
+      },
+      {
+        "id": "pool",
+        "name": "Swimming Pool",
+        "description": "Relax by our infinity pool with stunning views",
+        "icon": "pool"
+      },
+      {
+        "id": "gym",
+        "name": "Fitness Center",
+        "description": "State-of-the-art equipment for your workout needs",
+        "icon": "gym"
+      },
+      {
+        "id": "concierge",
+        "name": "24/7 Concierge",
+        "description": "Personalized service to make your stay memorable",
+        "icon": "concierge"
+      },
+      {
+        "id": "parking",
+        "name": "Valet Parking",
+        "description": "Complimentary valet parking for all guests",
+        "icon": "parking"
+      }
+    ],
+    "testimonials": [
+      {
+        "id": 1,
+        "name": "Sarah Johnson",
+        "rating": 5,
+        "comment": "Absolutely amazing experience! The staff was incredibly friendly and the room was spotless. Will definitely return!",
+        "date": "2024-01-15",
+        "avatar": "/placeholder-user.jpg"
+      },
+      {
+        "id": 2,
+        "name": "Michael Chen",
+        "rating": 5,
+        "comment": "Best hotel stay I've ever had. The amenities are top-notch and the location is perfect. Highly recommended!",
+        "date": "2024-01-10",
+        "avatar": "/placeholder-user.jpg"
+      },
+      {
+        "id": 3,
+        "name": "Emily Rodriguez",
+        "rating": 5,
+        "comment": "The attention to detail is remarkable. From check-in to check-out, everything was perfect. Can't wait to come back!",
+        "date": "2024-01-05",
+        "avatar": "/placeholder-user.jpg"
+      }
+    ],
+    "pricing": {
+      "taxRate": 0.18,
+      "serviceFee": 20,
+      "weekendMultiplier": 1.3
+    }
+  }

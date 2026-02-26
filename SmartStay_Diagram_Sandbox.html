@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartStay - 100% Native Architecture Visualizer</title>
+    <!-- Tailwind for our overlay UI -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <!-- SVG Tools for Mermaid -->
+    <script src="https://unpkg.com/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
+    <script src="https://unpkg.com/mermaid@9.4.3/dist/mermaid.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            background: #0f172a;
+        }
+
+        #app-sandbox {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+
+        /* SVG Pan Zoom overrides */
+        .diagram-container svg {
+            width: 100% !important;
+            height: 100% !important;
+            max-width: none !important;
+        }
+
+        #interceptor-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(90deg, #1e293b, #0f172a, #1e293b);
+            color: #38bdf8;
+            padding: 12px;
+            text-align: center;
+            font-size: 14px;
+            font-family: monospace;
+            z-index: 9999;
+            border-bottom: 1px solid #334155;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Push iframe down so banner doesn't cover actual Next.js nav */
+        .sandbox-container {
+            height: calc(100vh - 45px);
+            margin-top: 45px;
+        }
+    </style>
+</head>
+
+<body x-data="appData()">
+
+    <!-- Fixed Header identifying the sandbox -->
+    <div id="interceptor-banner">
+        <div class="flex items-center gap-2">
+            <span class="flex h-3 w-3 relative">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-sky-500"></span>
+            </span>
+            <strong>NATIVE DOM INTERCEPTOR ACTIVE</strong>
+        </div>
+        <div class="text-slate-400 text-xs">
+            Viewing Live App (<span class="text-emerald-400">http://localhost:3000</span>) &bull; Zero source code
+            modifications
+        </div>
+        <div>
+            <button @click="openMasterDiagramList()"
+                class="bg-brand-500 hover:bg-brand-400 text-white px-3 py-1 rounded text-xs font-bold transition-colors shadow">
+                View All Diagrams
+            </button>
+        </div>
+    </div>
+
+    <!-- The actual SmartStay Application runs inside here! -->
+    <div class="sandbox-container relative">
+        <iframe id="app-sandbox" src="http://localhost:3000"></iframe>
+
+        <!-- Loading overlay before React boots -->
+        <div id="sandbox-loader"
+            class="absolute inset-0 bg-slate-950 z-50 flex flex-col items-center justify-center text-brand-500">
+            <svg class="animate-spin h-10 w-10 text-brand-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none"
+                viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                </path>
+            </svg>
+            <h2 class="text-xl font-bold tracking-widest uppercase">Connecting to Local React Instance</h2>
+            <p class="text-slate-400 text-sm mt-2">Ensure `npm run dev` is running on port 3000</p>
+        </div>
+    </div>
+
+    <!-- The Universal Diagram Modal overlay (from our previous mock UI design) -->
+    <div x-show="modalOpen" style="display: none;" class="fixed inset-0 z-[10000] overflow-y-auto" role="dialog"
+        aria-modal="true">
+        <!-- Backdrop -->
+        <div x-show="modalOpen" x-transition.opacity
+            class="fixed inset-0 bg-slate-950/95 backdrop-blur-sm transition-opacity" @click="closeModal()"></div>
+
+        <!-- Modal Panel -->
+        <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-0">
+            <div x-show="modalOpen" x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+                x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 scale-100"
+                x-transition:leave-end="opacity-0 scale-95"
+                class="relative transform overflow-hidden rounded-2xl bg-slate-900 border border-slate-700 text-left shadow-2xl shadow-brand-500/10 transition-all sm:my-8 w-full max-w-7xl flex flex-col max-h-[90vh]">
+
+                <!-- Header -->
+                <div
+                    class="bg-slate-800/80 px-6 py-4 border-b border-slate-700 flex justify-between items-center sticky top-0 z-10">
+                    <div class="flex items-center gap-4">
+                        <div class="bg-brand-500/20 text-brand-400 p-2 rounded-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                                stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-2xl font-bold text-white tracking-wide" x-text="activeDiagram.title"></h3>
+                    </div>
+                    <button @click="closeModal()" type="button"
+                        class="text-slate-400 hover:text-white bg-slate-800 border border-slate-700 hover:bg-rose-500 hover:border-rose-400 transition-all rounded p-2 focus:outline-none flex items-center gap-2">
+                        <span class="text-xs font-bold uppercase tracking-wider pl-1">Close Trigger</span>
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Body Splits Diagram & Explanation -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 flex-grow overflow-hidden bg-slate-900">
+
+                    <!-- Diagram Viewport Area -->
+                    <div
+                        class="lg:col-span-2 border-r border-slate-800 relative bg-[#0f172a] diagram-container min-h-[500px] lg:min-h-[600px] flex items-center justify-center p-4">
+                        <div class="absolute inset-0 z-0 opacity-10"
+                            style="background-image: radial-gradient(#38bdf8 1px, transparent 1px); background-size: 20px 20px;">
+                        </div>
+
+                        <!-- Mermaid target container -->
+                        <div id="mermaid-render-target"
+                            class="w-full h-full relative z-10 flex items-center justify-center"></div>
+
+                        <!-- PanZoom Controls Tooltip -->
+                        <div
+                            class="absolute bottom-4 left-4 z-20 bg-slate-800/80 backdrop-blur rounded px-3 py-1.5 border border-slate-700 text-xs text-slate-300 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                                stroke="currentColor" class="w-4 h-4">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607zM10.5 7.5v6m3-3h-6" />
+                            </svg>
+                            Scroll to Zoom &bull; Drag to Pan
+                        </div>
+                        <button @click="resetPanZoom()"
+                            class="absolute bottom-4 right-4 z-20 bg-brand-500 hover:bg-brand-400 text-white rounded px-4 py-2 font-bold text-sm transition-colors shadow-lg shadow-brand-500/20">
+                            Recenter View
+                        </button>
+                    </div>
+
+                    <!-- Explainer Sidebar -->
+                    <div class="overflow-y-auto p-8 bg-slate-900 custom-scrollbar">
+                        <div class="flex items-center gap-2 mb-6 pb-4 border-b border-slate-800">
+                            <span
+                                class="bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+                                <span class="animate-pulse w-1.5 h-1.5 bg-indigo-400 rounded-full"></span>
+                                Live Intercept Explainer
+                            </span>
+                        </div>
+                        <div class="prose prose-invert prose-slate prose-img:rounded-xl text-base leading-relaxed"
+                            x-html="activeDiagram.description">
+                            <!-- Injected HTML description -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // Setup initial mermaid configuration matching existing parameters
+        mermaid.initialize({
+            startOnLoad: false,
+            theme: 'dark',
+            securityLevel: 'loose',
+            flowchart: { useMaxWidth: false, curve: 'basis', nodeSpacing: 60, rankSpacing: 60 },
+            sequence: { useMaxWidth: false, actorMargin: 90, messageMargin: 35, boxTextMargin: 15 },
+            er: { useMaxWidth: false, entityPadding: 25 },
+            state: { useMaxWidth: false }
+        });
+
+        const diagramsDB = {
+            arch_overview: {
+                title: "System Context Architecture",
+                code: `
+flowchart LR
+    G["Guest User"]:::person
+    A["Admin Support"]:::person
+    S["SmartStay Cloud Application"]:::system
+    P["Stripe Payment Gateway"]:::ext
+    D["MongoDB Cloud Atlas"]:::ext
+
+    classDef person fill:#0ea5e9,stroke:#0f172a,color:#fff,padding:15px,rx:10
+    classDef system fill:#4f46e5,stroke:#0f172a,color:#fff,padding:25px,rx:10
+    classDef ext fill:#475569,stroke:#0f172a,color:#fff,padding:15px,rx:10
+
+    G <-->|"Browses visually via HTTPS"| S
+    A <-->|"Modifies objects via HTTPS"| S
+    S <-->|"Validates PCI via API"| P
+    S <-->|"Persists Objects via TCP"| D
+                `,
+                description: `
+                    <h4 class="text-white font-bold text-xl mb-4 text-brand-400">Level 0: The Big Picture</h4>
+                    <p class="mb-5 text-slate-300">This diagram demonstrates how the highest-level actors interact with the SmartStay application and external services over standard networking protocols.</p>
+                    <ul class="space-y-4">
+                        <li class="flex gap-3 text-sm text-slate-300 bg-slate-800/50 p-3 border border-slate-700 rounded-lg">
+                            <strong class="text-white min-w-20">Guests:</strong> <span>Browse the React UI compiled natively via Next.js over HTTPS.</span>
+                        </li>
+                        <li class="flex gap-3 text-sm text-slate-300 bg-slate-800/50 p-3 border border-slate-700 rounded-lg">
+                            <strong class="text-white min-w-20">Admins:</strong> <span>Access protected Node.js API routes requiring verified JSON Web Token (JWT) headers to mutate the database.</span>
+                        </li>
+                        <li class="flex gap-3 text-sm text-slate-300 bg-slate-800/50 p-3 border border-slate-700 rounded-lg">
+                            <strong class="text-white min-w-20">Stripe:</strong> <span>Handles PCI-compliant secure payment intents and tokens. Credit Card logic physically lives on their servers, isolated from our Next.js frontend.</span>
+                        </li>
+                        <li class="flex gap-3 text-sm text-slate-300 bg-slate-800/50 p-3 border border-slate-700 rounded-lg">
+                            <strong class="text-white min-w-20">NoSQL:</strong> <span>MongoDB maintains a persistent TCP multiplexed pool connection with the backend Mongoose models to stream document data without huge handshake overheads.</span>
+                        </li>
+                    </ul>
+                `
+            },
+
+            auth_flow: {
+                title: "Admin Security Gateway & Login",
+                code: `
+sequenceDiagram
+    autonumber
+    actor User
+    participant Next as Protected logic
+    participant JWT as jsonwebtoken map
+    participant DB as MongoDB Auth
+    participant AdminAPI as api admin routes
+
+    User->>Next: Clicks Admin Nav
+    Next->>AdminAPI: GET endpoint with target Auth header
+
+    AdminAPI->>JWT: Execute lock map function
+    JWT->>JWT: Math Validation verify token format
+
+    alt Secret is Wrong or Expired value
+        JWT-->>Next: 401 Unauthorized Flag
+        Next-->>User: NextRouter send login page
+    else Signature Matches Key
+        JWT->>DB: Decoded Object parse
+        DB->>DB: search isAdmin filter object
+        alt user isAdmin is false
+            DB-->>AdminAPI: 403 Forbidden
+            AdminAPI-->>Next: Reject Response
+            Next-->>User: Render Error Banner UI
+        else user isAdmin is true value
+            DB->>AdminAPI: Assign var data
+            AdminAPI->>AdminAPI: Authorize network route
+            AdminAPI-->>Next: Send 200 payload Object
+            Next-->>User: Allow Render Screen Charts
+        end
+    end
+                `,
+                description: `
+                    <h4 class="text-white font-bold text-xl mb-4 text-brand-400">Secure Gateway Validation Logic</h4>
+                    <p class="mb-5 text-slate-300">You triggered the Authentication flow. When a user attempts to access the Admin dashboard or Login forms, the Node/Express backend doesn't just trust a cookie blindly. It rigorously verifies the signed JWT token block.</p>
+                    
+                    <div class="bg-indigo-900/40 p-5 rounded-xl border border-indigo-500/30 mb-6">
+                        <strong class="text-indigo-300 block mb-2 font-mono text-xs tracking-widest uppercase">Decryption Checkpoint</strong>
+                        <p class="text-sm text-indigo-100/80">The Node Express API parses the <code class="bg-indigo-950 px-1 rounded text-indigo-200">Authorization: Bearer</code> header and decrypts the signature using a server-side hidden <code class="bg-indigo-950 px-1 rounded text-pink-300">JWT_SECRET</code>.</p>
+                    </div>
+
+                    <ul class="list-none space-y-3">
+                        <li class="text-sm text-slate-300 flex items-start gap-2">
+                            <span class="text-rose-500 mt-0.5">⊗</span> If the token has expired or the signature is tampered with, it immediately throws a 401 Error.
+                        </li>
+                        <li class="text-sm text-slate-300 flex items-start gap-2">
+                            <span class="text-emerald-500 mt-0.5">⊛</span> Crucially, even if the token mathematics validate perfectly, the system queries the NoSQL cluster to ensure the user's <code class="text-brand-400">isAdmin</code> boolean flag is still <code class="text-emerald-400">true</code> since the token was issued.
+                        </li>
+                        <li class="text-sm text-slate-300 flex items-start gap-2">
+                            <span class="text-emerald-500 mt-0.5">⊛</span> This "double-check" halts massive privilege escalation vulnerabilities.
+                        </li>
+                    </ul>
+                `
+            },
+
+            stripe_checkout: {
+                title: "Secure Stripe Flow (PCI Compliant)",
+                code: `
+sequenceDiagram
+    autonumber
+    actor Guest
+    participant React as User Browser
+    participant StripeElements as Stripe iFrame
+    participant ExpressAPI as Node Backend
+    participant DB as MongoDB
+    participant StripeAPI as Stripe Core
+
+    Guest->>React: Types Card string into Form Input
+    note over React: Input is actually an isolated iFrame from Stripe
+    React->>StripeElements: Local Javascript Injection
+    
+    Guest->>React: Clicks Confirm Booking button
+    
+    React->>StripeElements: Trigger createPaymentMethod
+    StripeElements->>StripeAPI: Encrypted Transmission of Card Digits
+    StripeAPI-->>StripeElements: Returns pmToken String
+    StripeElements-->>React: PaymentMethod ID
+    
+    note over Guest, React: SmartStay NEVER sees actual credit card numbers.
+    
+    React->>ExpressAPI: POST api bookings with pmToken String
+    
+    ExpressAPI->>DB: Check CheckIn CheckOut Date Conflicts
+    DB-->>ExpressAPI: Dates Free
+    
+    ExpressAPI->>StripeAPI: POST v1 payment intents
+    
+    alt Charge Succeeded
+        StripeAPI-->>ExpressAPI: 200 OK succeeded
+        ExpressAPI->>DB: save Booking status Confirmed
+        ExpressAPI-->>React: 201 Created
+        React->>React: Router push booking confirmed
+    end
+                `,
+                description: `
+                    <h4 class="text-white font-bold text-xl mb-4 text-emerald-400">PCI Compliant Credit Card Isolation</h4>
+                    <p class="mb-6 text-slate-300">You just triggered the <strong>E-Commerce Booking Pipeline</strong>! Our architecture guarantees PCI Data Security Standard compliance by ensuring our Next.js frontend and Node backend <em>never touch the actual card numbers</em>.</p>
+                    
+                    <div class="space-y-4">
+                        <div class="relative pl-6 border-l-2 border-slate-700 pb-2">
+                            <span class="absolute -left-[5px] top-1.5 w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981]"></span>
+                            <h5 class="font-bold text-white text-sm mb-1 uppercase tracking-wide">Phase 1: The iFrame Illusion</h5>
+                            <p class="text-sm text-slate-400">When the React modal opened, the text boxes where you supposedly type credit card digits are not SmartStay HTML elements. They are tiny iframe cross-domain windows injected over the UI by Stripe. The keystrokes go straight to Stripe servers.</p>
+                        </div>
+                        <div class="relative pl-6 border-l-2 border-slate-700 pb-2 border-transparent">
+                            <span class="absolute -left-[5px] top-1.5 w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981]"></span>
+                            <h5 class="font-bold text-white text-sm mb-1 uppercase tracking-wide">Phase 2: Tokenization & Verification</h5>
+                            <p class="text-sm text-slate-400">When you click submit, Stripe gives React a temporary identifier string (ex: <code class="text-pink-300">pm_1Nx23z...</code>). React passes this string to our Node Server. The Node server quickly checks MongoDB to ensure the dates haven't been snatched in the last 2 seconds. Finally, Node talks directly to Stripe via REST to officially charge the token!</p>
+                        </div>
+                    </div>
+                `
+            },
+
+            room_filtering: {
+                title: "Client-Side Hydration: Instant Room Filtering",
+                code: `
+sequenceDiagram
+    actor User
+    participant NextRouter as Next js View
+    participant ReactState as React Context Array
+    participant Express as API
+    participant Database as Collections
+
+    User->>NextRouter: Load Rooms Page
+    NextRouter->>Express: Initial Fetch Command
+    Express->>Database: mongoose .find()
+    Database-->>Express: Returns Array Object
+    Express-->>NextRouter: Returns JSON Payload
+    NextRouter->>ReactState: Stores full array in memory
+    
+    note over User, ReactState: All further filtering happens instantly in browser RAM!
+    
+    User->>ReactState: Clicks "Suites" Filter Box
+    ReactState->>ReactState: Compute array.filter() logic
+    ReactState->>NextRouter: Trigger DOM re-render event
+    NextRouter-->>User: Screen instantly shrinks to target objects
+                `,
+                description: `
+                    <h4 class="text-white font-bold text-xl mb-4 text-sky-400">Lightning Fast Client-Side Interpolation</h4>
+                    <p class="mb-5 text-slate-300">You just interacted with the Room List or Navigation bar! SmartStay optimizes perceived performance by relying heavily on client-side RAM filtering.</p>
+                    
+                    <div class="bg-slate-800/80 p-5 rounded-lg border border-slate-700 mb-6">
+                        <strong class="text-white block mb-2">The Fetch-Once Principle</strong>
+                        <p class="text-sm text-slate-400 mb-3">Instead of firing a heavy TCP network request <em>every single time</em> a user clicks a checkbox or searches for a term, the Next.js <code class="px-1 bg-slate-800 text-brand-300 rounded">useEffect</code> hook requests the entire catalogue of active rooms as a JSON Array immediately upon initial route load.</p>
+                        <p class="text-sm text-slate-400">That payload is saved physically into the browser's memory via a React <code class="bg-slate-900 px-[4px] rounded text-emerald-300">useState()</code> array variable.</p>
+                    </div>
+
+                    <ul class="list-none space-y-2 text-sm text-slate-300">
+                        <li class="flex items-center gap-2">➔ When navigating or sorting, the application runs a vanilla JavaScript <code class="font-mono text-brand-400 bg-slate-800 px-1 rounded">.filter()</code> loop over the objects in RAM.</li>
+                        <li class="flex items-center gap-2">➔ React reconciler detects the array mutation and triggers an instant Virtual DOM tree redraw.</li>
+                        <li class="flex items-center gap-2">➔ The result is zero spinning buffering icons during basic exploratory filtering!</li>
+                    </ul>
+                `
+            }
+        };
+
+        // Custom Alpine App
+        function appData() {
+            return {
+                modalOpen: false,
+                panZoomInst: null,
+                activeDiagram: { id: '', title: '', code: '', description: '' },
+
+                async openDiagram(key) {
+                    const diagramObj = diagramsDB[key] || diagramsDB['arch_overview'];
+
+                    this.activeDiagram = { ...diagramObj, id: key };
+                    this.modalOpen = true;
+                    this.destroyPanZoom();
+
+                    const container = document.getElementById('mermaid-render-target');
+                    container.innerHTML = '<div class="absolute inset-0 flex flex-col items-center justify-center text-brand-500"><svg class="animate-spin h-12 w-12 mb-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span class="font-bold tracking-widest uppercase">Rendering Vector Node Map...</span></div>';
+
+                    await this.$nextTick();
+
+                    try {
+                        // Tiny delay unblocks React hooks internally
+                        await new Promise(r => setTimeout(r, 100));
+
+                        const cleanSource = this.activeDiagram.code.trim();
+                        // Compatibility logic for various Mermaid CDN versions
+                        const renderResult = await mermaid.render('injected-graph-' + Date.now(), cleanSource);
+                        const svg = typeof renderResult === 'string' ? renderResult : renderResult.svg;
+
+                        container.innerHTML = svg;
+                        const svgElement = container.querySelector('svg');
+
+                        if (svgElement) {
+                            svgElement.style.width = '100%';
+                            svgElement.style.height = '100%';
+
+                            this.panZoomInst = svgPanZoom(svgElement, {
+                                zoomEnabled: true,
+                                controlIconsEnabled: false,
+                                fit: true,
+                                center: true,
+                                minZoom: 0.1,
+                                maxZoom: 30,
+                                zoomScaleSensitivity: 0.3
+                            });
+                        }
+                    } catch (e) {
+                        console.error("Mermaid Render error", e);
+                        container.innerHTML = `<div class="text-rose-500 text-center font-bold">Failed to compile diagram.<br><span class="text-xs font-mono font-normal">${e}</span></div>`;
+                    }
+                },
+
+                openMasterDiagramList() {
+                    // Fallback to overview if button clicked
+                    this.openDiagram('arch_overview');
+                },
+
+                closeModal() {
+                    this.modalOpen = false;
+                    this.destroyPanZoom();
+                },
+
+                destroyPanZoom() {
+                    if (this.panZoomInst) {
+                        this.panZoomInst.destroy();
+                        this.panZoomInst = null;
+                    }
+                    const container = document.getElementById('mermaid-render-target');
+                    if (container) container.innerHTML = '';
+                },
+
+                resetPanZoom() {
+                    if (this.panZoomInst) {
+                        this.panZoomInst.resetZoom();
+                        this.panZoomInst.center();
+                        this.panZoomInst.fit();
+                    }
+                }
+            }
+        }
+
+        // ==========================================
+        // MACRO INTERCEPTOR ENGINE
+        // Reaches into the iFrame to steal clicks!
+        // ==========================================
+        window.addEventListener('load', () => {
+            const iframe = document.getElementById('app-sandbox');
+            const loader = document.getElementById('sandbox-loader');
+
+            iframe.onload = () => {
+                console.log("Sandbox Interceptor: Real app loaded. Dismissing loader.");
+
+                // Hide boot screen
+                loader.style.opacity = '0';
+                loader.style.transition = 'opacity 0.5s ease';
+                setTimeout(() => loader.style.display = 'none', 500);
+
+                try {
+                    const innerDoc = iframe.contentDocument || iframe.contentWindow.document;
+
+                    // The massive global click listener injected right into the Next.js app DOM
+                    innerDoc.addEventListener('click', (e) => {
+
+                        // We search up the DOM tree from the click target looking for specific tags or text
+                        let target = e.target;
+                        let text = "";
+                        let href = "";
+                        let cssClasses = "";
+
+                        // Traverse up slightly to catch button parents of SVGs/Spans
+                        for (let i = 0; i < 4 && target && target !== innerDoc.body; i++) {
+                            if (target.innerText) text += target.innerText.toLowerCase() + " ";
+                            if (target.href) href = target.href.toLowerCase();
+                            if (target.className && typeof target.className === 'string') cssClasses += target.className.toLowerCase() + " ";
+                            target = target.parentElement;
+                        }
+
+                        console.log("Sandbox Interceptor saw click on:", { text, href, cssClasses });
+
+                        // Define our interception rules and map them to our diagram keys
+                        let matchedDiagram = null;
+
+                        if (text.includes("book") || text.includes("checkout") || text.includes("pay")) {
+                            matchedDiagram = 'stripe_checkout';
+                        }
+                        else if (text.includes("admin") || href.includes("admin") || text.includes("login") || text.includes("sign")) {
+                            matchedDiagram = 'auth_flow';
+                        }
+                        else if (text.includes("room") || cssClasses.includes("filter") || href.includes("rooms")) {
+                            matchedDiagram = 'room_filtering';
+                        }
+
+                        // If we matched a rule, hijack the click event entirely!
+                        if (matchedDiagram) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            e.stopImmediatePropagation();
+                            console.log("INTERCEPTED! Triggering modal for: " + matchedDiagram);
+
+                            // Tell the Vue/Alpine context attached to the parent wrapper to open the modal
+                            // We use Alpine.$data to interact with Alpine from Vanilla JS
+                            Alpine.$data(document.querySelector('[x-data]')).openDiagram(matchedDiagram);
+                            return false;
+                        }
+
+                    }, true); // Use capture phase = true to steal the click BEFORE React sees it!
+
+                } catch (err) {
+                    console.error("Cross-origin or initialization error! Is Next.js running on localhost:3000?", err);
+                    loader.innerHTML = `
+            <div class="text-rose-500 font-bold mb-2">CORS or Network Error</div>
+                         <div class="text-sm text-slate-400">Please ensure 'npm run dev' is running completely inside the SmartStay-frontend folder.</div>
+                         <div class="text-xs text-rose-300 mt-4">${err.message}</div>
+                    `;
+                    loader.style.opacity = '1';
+                }
+            };
+        });
+
+    </script>
+</body>
+
+</html>

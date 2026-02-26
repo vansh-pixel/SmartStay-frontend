@@ -1,0 +1,63 @@
+{
+  "rooms": [
+    {
+      "name": "Executive Suite",
+      "id": "1",
+      "_id": "69806b234ceccf9dcae720f9"
+    },
+    {
+      "name": "Junior Suite",
+      "id": "2",
+      "_id": "69806b234ceccf9dcae72105"
+    },
+    {
+      "name": "Super Deluxe Suite",
+      "id": "3",
+      "_id": "69806b234ceccf9dcae72111"
+    }
+  ],
+  "bookings": [
+    {
+      "_id": "69818d61155109dfa64469fc",
+      "room": "69806b234ceccf9dcae72105",
+      "checkIn": "2026-02-21T18:30:00.000Z",
+      "checkOut": "2026-02-27T18:30:00.000Z",
+      "status": "confirmed"
+    },
+    {
+      "_id": "69818f59155109dfa6446a72",
+      "room": "69806b234ceccf9dcae720f9",
+      "checkIn": "2026-02-02T18:30:00.000Z",
+      "checkOut": "2026-02-05T18:30:00.000Z",
+      "status": "confirmed"
+    },
+    {
+      "_id": "6982e16f453b5a973f18d370",
+      "room": "69806b234ceccf9dcae720f9",
+      "checkIn": "2026-02-08T18:30:00.000Z",
+      "checkOut": "2026-02-11T18:30:00.000Z",
+      "status": "confirmed"
+    },
+    {
+      "_id": "6983006b453b5a973f18d3b6",
+      "room": "69806b234ceccf9dcae720f9",
+      "checkIn": "2026-02-21T18:30:00.000Z",
+      "checkOut": "2026-02-27T18:30:00.000Z",
+      "status": "confirmed"
+    },
+    {
+      "_id": "698311e0453b5a973f18d3f8",
+      "room": "69806b234ceccf9dcae72105",
+      "checkIn": "2026-02-14T18:30:00.000Z",
+      "checkOut": "2026-02-18T18:30:00.000Z",
+      "status": "confirmed"
+    },
+    {
+      "_id": "69861f2d51e6f6a08ca7f0c9",
+      "room": "69806b234ceccf9dcae72111",
+      "checkIn": "2026-02-21T18:30:00.000Z",
+      "checkOut": "2026-02-24T18:30:00.000Z",
+      "status": "confirmed"
+    }
+  ]
+}

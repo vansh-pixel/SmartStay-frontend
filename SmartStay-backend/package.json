@@ -1,0 +1,31 @@
+{
+  "name": "smartstay-backend",
+  "version": "1.0.0",
+  "description": "A comprehensive Node.js/Express backend API for the SmartStay hotel booking system, built with MongoDB Atlas and JWT authentication.",
+  "main": "db.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "colors": "^1.4.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^4.18.2",
+    "express-async-handler": "^1.2.0",
+    "express-rate-limit": "^7.5.1",
+    "express-validator": "^7.0.1",
+    "google-auth-library": "^10.5.0",
+    "groq-sdk": "^0.37.0",
+    "helmet": "^7.1.0",
+    "jsdom": "^28.1.0",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^8.0.3",
+    "nodemailer": "^7.0.13",
+    "stripe": "^20.3.0"
+  }
+}

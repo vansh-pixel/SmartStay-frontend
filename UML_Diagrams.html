@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartStay - Extreme Detail Interactive Master UML Viewer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://unpkg.com/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
+
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(650px, 1fr));
+            gap: 2.5rem;
+            margin-top: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .diagram-card {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            position: relative;
+        }
+
+        .diagram-title {
+            color: #38bdf8;
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .diagram-desc {
+            color: #94a3b8;
+            font-size: 1rem;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+
+        .svg-container {
+            width: 100%;
+            height: 480px;
+            background-color: #0f172a;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            position: relative;
+            cursor: move;
+            border: 1px solid #334155;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .svg-container svg {
+            width: 100% !important;
+            height: 100% !important;
+            max-width: none !important;
+        }
+
+        .fullscreen-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(15, 23, 42, 0.98);
+            z-index: 9999;
+            display: none;
+            padding: 2rem;
+            flex-direction: column;
+        }
+
+        .fullscreen-modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            flex-grow: 1;
+            background-color: #1e293b;
+            border-radius: 1rem;
+            border: 2px solid #38bdf8;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 1.2rem;
+            right: 1.2rem;
+            display: flex;
+            gap: 0.75rem;
+            z-index: 10;
+        }
+
+        .btn {
+            background-color: #38bdf8;
+            color: #0f172a;
+            border: none;
+            border-radius: 0.35rem;
+            padding: 0.6rem 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+
+        .btn:hover {
+            background-color: #0ea5e9;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            background-color: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 2rem;
+            cursor: pointer;
+            z-index: 100;
+            box-shadow: 0 4px 6px -1px rgb(239 68 68 / 0.3);
+        }
+
+        #loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0f172a;
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: #38bdf8;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid #38bdf8;
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 2rem;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body class="min-h-screen">
+
+    <div id="loader">
+        <div class="spinner"></div>
+        Generating 16+ Extreme Detail Diagrams...
+    </div>
+
+    <header class="bg-slate-900 border-b border-slate-800 p-10 shadow-xl">
+        <div class="max-w-7xl mx-auto">
+            <h1
+                class="text-4xl lg:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-indigo-500 text-center mb-6">
+                SmartStay - Extreme Detail Interactive UML Board
+            </h1>
+            <p class="text-center text-slate-300 text-lg lg:text-xl max-w-5xl mx-auto leading-relaxed">
+                Every single click documented. <strong class="text-sky-400">Scroll your mouse wheel</strong> to zoom.
+                Click <strong class="text-sky-400">Expand ⛶</strong> for fullscreen detail.
+            </p>
+        </div>
+    </header>
+
+    <div class="max-w-[96%] mx-auto mt-12 mb-4 px-4 border-b border-slate-800 pb-4">
+        <h2 class="text-3xl font-bold text-sky-300">Section 1: Architectural Hierarchy & Schema</h2>
+    </div>
+
+    <main class="max-w-[96%] mx-auto px-4">
+        <div class="grid-layout">
+
+            <div class="diagram-card">
+                <h2 class="diagram-title">System Context (Level 0)</h2>
+                <div class="svg-container" id="container-1"></div>
+                <div class="controls"><button class="btn" onclick="resetZoom('container-1')">Reset</button><button
+                        class="btn" onclick="expandGraph('container-1')">Expand ⛶</button></div>
+            </div>
+
+            <div class="diagram-card">
+                <h2 class="diagram-title">Container Protocol Architecture (Level 1)</h2>
+                <div class="svg-container" id="container-2"></div>
+                <div class="controls"><button class="btn" onclick="resetZoom('container-2')">Reset</button><button
+                        class="btn" onclick="expandGraph('container-2')">Expand ⛶</button></div>
+            </div>
+
+            <div class="diagram-card">
+                <h2 class="diagram-title">Deep React App Component Tree (Level 2)</h2>
+                <div class="svg-container" id="container-3"></div>
+                <div class="controls"><button class="btn" onclick="resetZoom('container-3')">Reset</button><button
+                        class="btn" onclick="expandGraph('container-3')">Expand ⛶</button></div>
+            </div>
+
+            <div class="diagram-card">
+                <h2 class="diagram-title">Extreme Database ERD (Deep Schema)</h2>
+                <div class="svg-container" id="container-4"></div>
+                <div class="controls"><button class="btn" onclick="resetZoom('container-4')">Reset</button><button
+                        class="btn" onclick="expandGraph('container-4')">Expand ⛶</button></div>
+            </div>
+
+        </div>
+    </main>
+
+    <div class="max-w-[96%] mx-auto mt-4 mb-4 px-4 border-b border-slate-800 pb-4">
+        <h2 class="text-3xl font-bold text-emerald-400">Section 2: The E-Commerce & Stripe Flows Engine</h2>
+    </div>
+
+    <main class="max-w-[96%] mx-auto px-4">
+        <div class="grid-layout">
+
+            <div class="diagram-card">
+                <h2 class="diagram-title">Click Seq: Secure Stripe Card Storage</h2>
+                <div class="svg-container" id="container-5"></div>
+                <div class="controls"><button class="btn" onclick="resetZoom('container-5')">Reset</button><button
+                        class="btn" onclick="expandGraph('container-5')">Expand ⛶</button></div>
+            </div>
+
+            <div class="diagram-card">
+                <h2 class="diagram-title">Click Seq: Room Browsing Filtering</h2>
+                <div class="svg-container" id="container-6"></div>
+                <div class="controls"><button class="btn" onclick="resetZoom('container-6')">Reset</button><button
+                        class="btn" onclick="expandGraph('container-6')">Expand ⛶</button></div>
+            </div>
+
+            <div class="diagram-card">
+                <h2 class="diagram-title">Click Seq: Event Hall distinct validations</h2>
+                <div class="svg-container" id="container-7"></div>
+                <div class="controls"><button class="btn" onclick="resetZoom('container-7')">Reset</button><button
+                        class="btn" onclick="expandGraph('container-7')">Expand ⛶</button></div>
+            </div>
+
+            <div class="diagram-card">
+                <h2 class="diagram-title">Booking Status Lifecycle Engine</h2>
+                <div class="svg-container" id="container-8"></div>
+                <div class="controls"><button class="btn" onclick="resetZoom('container-8')">Reset</button><button
+                        class="btn" onclick="expandGraph('container-8')">Expand ⛶</button></div>
+            </div>
+
+        </div>
+    </main>
+
+    <div class="max-w-[96%] mx-auto mt-4 mb-4 px-4 border-b border-slate-800 pb-4">
+        <h2 class="text-3xl font-bold text-fuchsia-400">Section 3: Admins, Security, and Edge System Interactions</h2>
+    </div>
+
+    <main class="max-w-[96%] mx-auto px-4">
+        <div class="grid-layout">
+
+            <div class="diagram-card">
+                <h2 class="diagram-title">Click Seq: Admin Authentication Lockout</h2>
+                <div class="svg-container" id="container-9"></div>
+                <div class="controls"><button class="btn" onclick="resetZoom('container-9')">Reset</button><button
+                        class="btn" onclick="expandGraph('container-9')">Expand ⛶</button></div>
+            </div>
+
+            <div class="diagram-card">
+                <h2 class="diagram-title">Click Seq: Massive Admin Stats Generation</h2>
+                <div class="svg-container" id="container-10"></div>
+                <div class="controls"><button class="btn" onclick="resetZoom('container-10')">Reset</button><button
+                        class="btn" onclick="expandGraph('container-10')">Expand ⛶</button></div>
+            </div>
+
+            <div class="diagram-card">
+                <h2 class="diagram-title">Click Seq: Admin Manual Status Updates</h2>
+                <div class="svg-container" id="container-11"></div>
+                <div class="controls"><button class="btn" onclick="resetZoom('container-11')">Reset</button><button
+                        class="btn" onclick="expandGraph('container-11')">Expand ⛶</button></div>
+            </div>
+
+            <div class="diagram-card">
+                <h2 class="diagram-title">Click Seq: User Submits a Review DB Logic</h2>
+                <div class="svg-container" id="container-12"></div>
+                <div class="controls"><button class="btn" onclick="resetZoom('container-12')">Reset</button><button
+                        class="btn" onclick="expandGraph('container-12')">Expand ⛶</button></div>
+            </div>
+
+            <div class="diagram-card">
+                <h2 class="diagram-title">Click Seq: Google Gemini AI Execution Flow</h2>
+                <div class="svg-container" id="container-13"></div>
+                <div class="controls"><button class="btn" onclick="resetZoom('container-13')">Reset</button><button
+                        class="btn" onclick="expandGraph('container-13')">Expand ⛶</button></div>
+            </div>
+
+            <div class="diagram-card">
+                <h2 class="diagram-title">Click Seq: Advanced Tailwind Theme Mutation</h2>
+                <div class="svg-container" id="container-14"></div>
+                <div class="controls"><button class="btn" onclick="resetZoom('container-14')">Reset</button><button
+                        class="btn" onclick="expandGraph('container-14')">Expand ⛶</button></div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- FULLSCREEN MODAL -->
+    <div id="fullscreen-overlay" class="fullscreen-modal">
+        <div class="close-btn" onclick="closeFullscreen()">×</div>
+        <div class="modal-content" id="modal-content"></div>
+        <div
+            class="absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-800 px-6 py-2 rounded-full border border-slate-600 shadow-2xl z-50 text-center">
+            <p class="text-sky-300 font-bold mb-1 tracking-wider uppercase text-sm">Extreme Detail Mode Enabled</p>
+            <p class="text-white text-xs opacity-75">Scroll Wheel: Zoom &bull; Click + Drag: Pan</p>
+        </div>
+    </div>
+
+
+    <script src="https://unpkg.com/mermaid@9.4.3/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: false,
+            theme: 'dark',
+            securityLevel: 'loose',
+            flowchart: { useMaxWidth: false, curve: 'basis', nodeSpacing: 60, rankSpacing: 60 },
+            sequence: { useMaxWidth: false, actorMargin: 90, messageMargin: 35, boxTextMargin: 15 },
+            er: { useMaxWidth: false, entityPadding: 25 },
+            state: { useMaxWidth: false }
+        });
+
+        window.panZoomInstances = {};
+
+        // By hardcoding logic strictly in JS string arrays, we completely bypass HTML parser newline squishing bugs!
+        // ER types have been simplified to basic lowercase string primitives to ensure parser never crashes.
+        const diagramSources = {
+            'container-1': `
+flowchart LR
+    G["Guest User"]:::person
+    A["Admin Support"]:::person
+    S["SmartStay Cloud Application"]:::system
+    P["Stripe Payment Gateway"]:::ext
+    D["MongoDB Cloud Atlas"]:::ext
+
+    classDef person fill:#0ea5e9,stroke:#0f172a,color:#fff,padding:15px,rx:10
+    classDef system fill:#4f46e5,stroke:#0f172a,color:#fff,padding:25px,rx:10
+    classDef ext fill:#475569,stroke:#0f172a,color:#fff,padding:15px,rx:10
+
+    G <-->|"Browses visually via HTTPS"| S
+    A <-->|"Modifies objects via HTTPS"| S
+    S <-->|"Validates PCI via API"| P
+    S <-->|"Persists Objects via TCP"| D
+            `,
+            'container-2': `
+flowchart LR
+    U(("Browser Client")):::person
+    
+    subgraph Platform["SmartStay VPN"]
+        direction TB
+        UI["Next.js SSR App Server"]:::system
+        API["Express API Server"]:::system
+        DB[("MongoDB Collections")]:::system
+    end
+
+    U <-->|"HTTPS JSON"| UI
+    UI <-->|"Axios REST"| API
+    API <-->|"Mongoose BSON pool"| DB
+
+    classDef person fill:#64748b,stroke:#0f172a,color:#fff,padding:20px
+    classDef system fill:#0284c7,stroke:#0f172a,color:#fff,padding:20px
+            `,
+            'container-3': `
+flowchart TB
+    APP["RootLayout"]
+    NAV["Navigation Navbar"]
+    FOOT["Footer"]
+    MAIN["Core Pages"]
+    
+    HOME["Home Page"]
+    HOME_HERO["Hero Section"]
+    HOME_ROOMS["FeaturedRooms List"]
+
+    ROOMS["Rooms Events Directory"]
+    ROOMS_FILTER["RoomFilters Component"]
+    ROOMS_CARD["RoomCard"]
+    ROOM_DETAIL["RoomDetailPage"]
+    BOOKING_FORM["Booking Form"]
+
+    ADMIN["Admin Sub App"]
+    ADMIN_NAV["Admin Sidebar"]
+    ADMIN_CHART["AdminCharts"]
+    ADMIN_TABLE["AdminBookings"]
+    ADMIN_MODAL["Admin Status Modal"]
+
+    APP --> NAV
+    APP --> MAIN
+    APP --> FOOT
+    
+    MAIN --> HOME
+    HOME --> HOME_HERO
+    HOME --> HOME_ROOMS
+
+    MAIN --> ROOMS
+    ROOMS --> ROOMS_FILTER
+    ROOMS --> ROOMS_CARD
+    ROOMS --> ROOM_DETAIL
+    ROOM_DETAIL --> BOOKING_FORM
+
+    MAIN --> ADMIN
+    ADMIN --> ADMIN_NAV
+    ADMIN --> ADMIN_CHART
+    ADMIN --> ADMIN_TABLE
+    ADMIN_TABLE --> ADMIN_MODAL
+            `,
+            'container-4': `
+erDiagram
+    USER ||--o{ BOOKING : creates
+    USER ||--o{ EVENT_BOOKING : creates
+    USER ||--o{ REVIEW : authors
+    ROOM ||--o{ BOOKING : accepts
+    EVENT_HALL ||--o{ EVENT_BOOKING : accepts
+
+    USER {
+        string id PK
+        string name
+        string email
+        string password
+        boolean isAdmin
+        string resetPasswordToken
+        date resetPasswordExpire
+        date createdAt
+    }
+
+    ROOM {
+        string id PK
+        string slug
+        string name
+        int basePrice
+        string priceDisplay
+        array image
+        string description 
+        string size
+        string bedType
+        int maxGuests
+        array amenities
+    }
+
+    EVENT_HALL {
+        string id PK
+        string slug
+        string name
+        string hallType
+        int pricePerDay
+        int capacity
+        string description
+        array image
+        array amenities
+    }
+
+    BOOKING {
+        string id PK
+        string roomId FK
+        string userId FK
+        string fullName
+        string email
+        string phone
+        int adults
+        int children
+        date checkIn
+        date checkOut
+        int basePrice
+        int serviceFee
+        int taxes
+        int total
+        string status
+        string paymentStatus
+    }
+
+    REVIEW {
+        string id PK
+        string userId FK
+        string name
+        string email
+        string quote
+        int rating
+        date createdAt
+    }
+            `,
+            'container-5': `
+sequenceDiagram
+    autonumber
+    actor Guest
+    participant React as User Browser
+    participant StripeElements as Stripe iFrame
+    participant ExpressAPI as Node Backend
+    participant DB as MongoDB Cluster
+    participant StripeAPI as Stripe Core
+
+    Guest->>React: Types Card string into Form Input
+    note over React: Input is actually an isolated iFrame from Stripe
+    React->>StripeElements: Local Javascript Injection
+    
+    Guest->>React: Clicks Confirm Booking button
+    
+    React->>StripeElements: Trigger createPaymentMethod
+    StripeElements->>StripeAPI: Encrypted Transmission of Card Digits
+    StripeAPI->>StripeAPI: Math Validation Token generation
+    StripeAPI-->>StripeElements: Returns pmToken String
+    StripeElements-->>React: PaymentMethod object String ID
+    
+    note over Guest, React: SmartStay NEVER sees the actual credit card numbers.
+    
+    React->>ExpressAPI: POST api bookings with pmToken String
+    
+    ExpressAPI->>DB: Check CheckIn CheckOut Date Conflicts
+    DB-->>ExpressAPI: Dates Free
+    ExpressAPI->>ExpressAPI: SERVER calculates Taxes and Total Math
+    
+    ExpressAPI->>StripeAPI: POST v1 payment intents
+    StripeAPI->>StripeAPI: Bank Charge execute network
+    
+    alt Charge Failed
+        StripeAPI-->>ExpressAPI: 402 Card Error
+        ExpressAPI-->>React: 400 Bad Request
+    else Charge Succeeded
+        StripeAPI-->>ExpressAPI: 200 OK succeeded
+        ExpressAPI->>DB: save Booking status Confirmed
+        DB-->>ExpressAPI: new id generated
+        ExpressAPI-->>React: 201 Created
+        React->>React: Router push booking confirmed screen
+    end
+            `,
+            'container-6': `
+sequenceDiagram
+    actor User
+    participant NextRouter as Next js View
+    participant ReactState as React Context Array
+    participant Express as API GET api rooms
+    participant Database as Collections
+
+    User->>NextRouter: Clicks Rooms Link
+    NextRouter->>Express: Fetch Server Side Call
+    Express->>Database: mongoose target find sort logic
+    Database-->>Express: Returns Array Object
+    Express-->>NextRouter: Returns JSON Payload
+    NextRouter->>ReactState: Stores array in memory
+    
+    User->>ReactState: Clicks Checkbox Has Pool
+    ReactState->>ReactState: Filter Computation Keep match
+    ReactState->>NextRouter: Re render DOM tree
+    NextRouter-->>User: Screen shrinks to match Pool objects
+    
+    User->>ReactState: Clicks Checkbox Deluxe Mode
+    ReactState->>ReactState: Filter Intersection
+    ReactState->>NextRouter: Force map DOM components
+    NextRouter-->>User: Results Display
+            `,
+            'container-7': `
+sequenceDiagram
+    actor Booker
+    participant UI as Event Booking Modal
+    participant Backend as Event Controller
+    participant Model as Schema Config
+
+    Booker->>UI: Selects Conference Hall string
+    Booker->>UI: Click Submit Post Button
+    
+    UI->>Backend: POST api events route execution
+    
+    Backend->>Model: Validate eventDate threshold
+    alt Past Date Selected
+        Model-->>Backend: Throw Error
+        Backend-->>UI: 400 Bad Request
+    else Date Valid
+        Backend->>Model: Query existing Event
+        Model-->>Backend: Array Data return
+        
+        alt Array Not Empty Space taken
+            Backend-->>UI: 400 Conflict taken
+        else Array Empty Slots clear
+            Backend->>Backend: Calculate Math Add Taxes
+            Backend->>Model: save new target Document
+            Model-->>Backend: Save Execution Success
+            Backend-->>UI: 201 Created Success
+            UI-->>Booker: Draw Confetti Screen
+        end
+    end
+            `,
+            'container-8': `
+stateDiagram-v2
+    direction TB
+    [*] --> PENDING_PAYMENT : Step 1 Add Cart
+    
+    PENDING_PAYMENT --> FAILED_DECLINED : Stripe Failed
+    PENDING_PAYMENT --> CONFIRMED_SECURE : Success Block
+    
+    CONFIRMED_SECURE --> USER_CANCELLED : User deletes Doc
+    CONFIRMED_SECURE --> CHECKED_IN : Admin manual Override
+    
+    CHECKED_IN --> CHECKED_OUT : Admin updates string
+    CHECKED_IN --> COMPLETED_EVENT : Time hook execution
+    
+    FAILED_DECLINED --> [*]
+    USER_CANCELLED --> [*]
+    CHECKED_OUT --> [*]
+    COMPLETED_EVENT --> [*]
+            `,
+            'container-9': `
+sequenceDiagram
+    autonumber
+    actor User
+    participant Next as Protected logic
+    participant JWT as jsonwebtoken map
+    participant DB as MongoDB Auth
+    participant AdminAPI as api admin routes
+    
+    User->>Next: Clicks Admin Nav
+    Next->>AdminAPI: GET endpoint with target Auth header
+    
+    AdminAPI->>JWT: Execute lock map function
+    JWT->>JWT: Math Validation verify token format
+    
+    alt Secret is Wrong or Expired value
+        JWT-->>Next: 401 Unauthorized Flag
+        Next-->>User: NextRouter send login page
+    else Signature Matches Key
+        JWT->>DB: Decoded Object parse
+        DB->>DB: search isAdmin filter object
+        alt user isAdmin is false
+            DB-->>AdminAPI: 403 Forbidden Throw String
+            AdminAPI-->>Next: Reject Response
+            Next-->>User: Render Error Banner UI
+        else user isAdmin is true value
+            DB->>AdminAPI: Assign var data
+            AdminAPI->>AdminAPI: Authorize network route
+            AdminAPI-->>Next: Send 200 payload Object
+            Next-->>User: Allow Render Screen Charts
+        end
+    end
+            `,
+            'container-10': `
+sequenceDiagram
+    actor AdminBrowser
+    participant API as Node js CodeBlock
+    participant Mongo as NoSQL Logic
+
+    AdminBrowser->>API: Next Mount Load Event
+    
+    par Async Promises Block
+        API->>Mongo: COUNT User Size
+        API->>Mongo: COUNT Room Size
+        API->>Mongo: AGGREGATE Revenue Accumulator
+        API->>Mongo: AGGREGATE Date Accumulator
+    end
+    
+    Mongo-->>API: Resolves Integer map sets
+    
+    API->>API: Compute var addition limit
+    API->>API: Compute target structure
+    
+    API-->>AdminBrowser: Output complete Object
+    AdminBrowser->>AdminBrowser: Generate Recharts Array map
+            `,
+            'container-11': `
+sequenceDiagram
+    actor Admin_UI
+    participant FrontReact as View Layer
+    participant API as Backend Route Logic
+    participant DB as NoSQL DB
+
+    Admin_UI->>FrontReact: Adjust UI String Dropdown
+    FrontReact->>API: Call PUT target var JSON Object
+    
+    API->>DB: query ID mutate Object Map
+    
+    alt Target Destroyed Overwritten
+        DB-->>API: returns null catch Math
+        API-->>FrontReact: 404 Output error payload
+    else Valid Mutation Found
+        DB->>DB: Save object
+        DB-->>API: returns Output Promise
+        API-->>FrontReact: 200 OK Target String
+        FrontReact->>FrontReact: Filter local list match update Row flash string
+    end
+            `,
+            'container-12': `
+sequenceDiagram
+    actor PublicUser
+    participant UI as Form View
+    participant Backend as Express Call
+    participant Mongo as Write Sys
+
+    PublicUser->>UI: Selects Star inputs words
+    UI->>Backend: Transmit String object map
+    Backend->>Mongo: Test Format rule loop
+    
+    alt Input Failed Test Function string Match limit
+        Mongo-->>Backend: Error object String map
+        Backend-->>UI: 400 Bad Syntax flag
+    else Sanitized Map Clear Success Event
+        Mongo->>Mongo: Save to Server Logic Disk Drive
+        Mongo-->>Backend: OK return
+        Backend-->>UI: 201 Success Response Trigger Banner Confetti Action Block
+    end
+            `,
+            'container-13': `
+sequenceDiagram
+    actor Guest
+    participant ReactBot as Chat Bar
+    participant APIRoute as POST Express
+    participant GeminiCore as Server AI Math
+
+    Guest->>ReactBot: Type string Help Send Click
+    ReactBot->>ReactBot: Add UI List update DOM list
+    ReactBot->>APIRoute: Triggers Network request JSON API
+    
+    APIRoute->>GeminiCore: Generate Prediction system query concat string loop
+    GeminiCore->>GeminiCore: Neural Net math algorithm block
+    
+    GeminiCore-->>APIRoute: Compute Block stream text Object
+    APIRoute-->>ReactBot: Return String JSON wrapper
+    
+    ReactBot->>ReactBot: Dispatch var change value Array setter List object
+    ReactBot-->>Guest: Render Text string DOM bubble text element
+            `,
+            'container-14': `
+sequenceDiagram
+    actor Viewer
+    participant NavIcon as View Component Map
+    participant ThemeSys as ThemeContext Object
+    participant DOMLayer as Document Layer Object Engine
+
+    Viewer->>NavIcon: Click button change Graphic array item
+    NavIcon->>ThemeSys: Execute Theme Dispatch block
+    
+    ThemeSys->>DOMLayer: Update Window local variable block Memory hook
+    ThemeSys->>DOMLayer: Root element tag attribute Set String Flag Array Switch Logic
+    
+    DOMLayer->>DOMLayer: CSS Variables overwrite Object
+    
+    DOMLayer-->>Viewer: Force Client Screen Redraw Object
+            `
+        };
+
+        async function renderLargeGraphs() {
+            for (const [containerId, source] of Object.entries(diagramSources)) {
+                const container = document.getElementById(containerId);
+                if (!container) continue;
+
+                try {
+                    const cleanSource = source.trim();
+                    const renderResult = await mermaid.render('master-graph-' + containerId, cleanSource);
+                    const svg = typeof renderResult === 'string' ? renderResult : renderResult.svg;
+
+                    container.innerHTML = svg;
+
+                    const svgElement = container.querySelector('svg');
+
+                    if (svgElement) {
+                        svgElement.style.maxWidth = 'none';
+                        svgElement.style.height = '100%';
+
+                        window.panZoomInstances[containerId] = svgPanZoom(svgElement, {
+                            zoomEnabled: true,
+                            controlIconsEnabled: false,
+                            fit: true,
+                            center: true,
+                            minZoom: 0.1,
+                            maxZoom: 30,
+                            zoomScaleSensitivity: 0.2
+                        });
+                    }
+                } catch (e) {
+                    console.error("Master Renderer Build Error:", containerId, e);
+                    container.innerHTML = `<div class="text-red-500 font-bold p-8">Graph failed to compile: ${e.message}</div>`;
+                }
+            }
+
+            // Hide the loader
+            setTimeout(() => {
+                const loader = document.getElementById('loader');
+                if (loader) {
+                    loader.style.opacity = '0';
+                    setTimeout(() => loader.style.display = 'none', 500);
+                }
+            }, 800);
+        }
+
+        // Run immediately if DOM is ready, otherwise wait.
+        // This stops the classic loading logic from failing (Module script race condition fix).
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', renderLargeGraphs);
+        } else {
+            renderLargeGraphs();
+        }
+
+        window.resetZoom = function (containerId) {
+            const instance = window.panZoomInstances[containerId];
+            if (instance) {
+                instance.resetZoom();
+                instance.center();
+                instance.fit();
+            }
+        };
+
+        window.expandGraph = function (containerId) {
+            const orgContainer = document.getElementById(containerId);
+            const svgElement = orgContainer.querySelector('svg');
+
+            if (!svgElement) return;
+
+            const modal = document.getElementById('fullscreen-overlay');
+            const modalContent = document.getElementById('modal-content');
+
+            modalContent.innerHTML = '';
+
+            const clonedSvg = svgElement.cloneNode(true);
+            clonedSvg.removeAttribute('id');
+            clonedSvg.style.width = '100%';
+            clonedSvg.style.height = '100%';
+
+            modalContent.appendChild(clonedSvg);
+            modal.classList.add('active');
+
+            window.fullscreenPanZoom = svgPanZoom(clonedSvg, {
+                zoomEnabled: true,
+                controlIconsEnabled: false,
+                fit: true,
+                center: true,
+                minZoom: 0.1,
+                maxZoom: 30,
+                zoomScaleSensitivity: 0.3
+            });
+        };
+
+        window.closeFullscreen = function () {
+            const modal = document.getElementById('fullscreen-overlay');
+            modal.classList.remove('active');
+
+            if (window.fullscreenPanZoom) {
+                window.fullscreenPanZoom.destroy();
+                window.fullscreenPanZoom = null;
+            }
+            document.getElementById('modal-content').innerHTML = '';
+        };
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeFullscreen();
+        });
+    </script>
+</body>
+
+</html>

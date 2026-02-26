@@ -1,0 +1,83 @@
+/* 1. HIDE CLIENT NAVBAR & FOOTER */
+.navbar,
+.nav,
+header,
+footer,
+.client-footer {
+  display: none !important;
+}
+
+/* 2. ADMIN VARIABLES */
+:root {
+  --admin-orange: #ff8c42;
+  --admin-dark: #333;
+  --admin-light: #f4f6f8;
+}
+
+/* 3. LAYOUT & SCROLLBAR */
+body {
+  background-color: #f8fafc;
+  /* Matches Tailwind gray-50 */
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* 4. TABLE STYLES */
+.table-container {
+  overflow-x: auto;
+  /* Tailwind handles background and rounded corners now */
+}
+
+.custom-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.custom-table th {
+  /* Tailwind handles basic styling */
+  white-space: nowrap;
+}
+
+.custom-table td {
+  border-bottom: 1px solid #f3f4f6;
+  /* gray-100 */
+}
+
+.custom-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* 5. BADGES */
+.status-badge {
+  text-transform: capitalize;
+  font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
+}
+
+/* 6. UTILITIES */
+.admin-card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.admin-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
