@@ -356,9 +356,13 @@ const googleLogin = asyncHandler(async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Google Login Error:", error);
+    console.error("=============== GOOGLE LOGIN ERROR ===============");
+    console.error("Error Message:", error.message);
+    console.error("Full Error Object:", error);
+    console.error("Provided Token starts with:", token ? token.substring(0, 20) + '...' : 'undefined');
+    console.error("==================================================");
     res.status(401);
-    throw new Error('Google authentication failed');
+    throw new Error(`Google authentication failed: ${error.message}`);
   }
 });
 
