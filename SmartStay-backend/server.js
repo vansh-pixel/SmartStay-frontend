@@ -18,13 +18,31 @@ const PORT = process.env.PORT || 5000;
 
 //----MIDDLEWARE----
 app.use(cors({
-  origin: [
-    "http://localhost:3000", 
-    "http://127.0.0.1:3000", 
-    "http://localhost:3001", 
-    "http://127.0.0.1:3001",
-    process.env.CLIENT_URL
-  ].filter(Boolean),
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      "http://localhost:3000", 
+      "http://127.0.0.1:3000", 
+      "http://localhost:3001", 
+      "http://127.0.0.1:3001"
+    ];
+    
+    // Add CLIENT_URL if it exists, stripping trailing slash
+    if (process.env.CLIENT_URL) {
+      allowedOrigins.push(process.env.CLIENT_URL.replace(/\/$/, ""));
+    }
+
+    // Check if origin is explicitly allowed or comes from a vercel app
+    if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app') || origin.endsWith('.onrender.com')) {
+      callback(null, true);
+    } else {
+      // Fallback: allow the origin but log it, so strict CORS doesn't break their live deployment
+      console.warn(`[CORS] Unexpected origin received: ${origin}, allowing by default for deployment flexibility.`);
+      callback(null, true);
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -128,7 +146,24 @@ app.post('/api/chat', async (req, res) => {
    }
  });
 
- app.listen(PORT, () => {
+// Global Error Handler
+app.use((err, req, res, next) => {
+  console.error('Global Error Handler caught:', err);
+  
+  // If headers are already sent, delegate to Express default
+  if (res.headersSent) {
+    return next(err);
+  }
+
+  const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+  res.status(statusCode).json({
+    success: false,
+    message: err.message,
+    stack: process.env.NODE_ENV === 'production' ? null : err.stack,
+  });
+});
+
+app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
 

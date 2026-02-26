@@ -42,7 +42,7 @@ const userSchema = new mongoose.Schema({
 userSchema.pre('save', async function(next) {
   // If password is not modified (e.g., we are just updating the name), skip hashing
   if (!this.isModified('password')) {
-    next();
+    return next();
   }
   // Generate salt and hash the password
   const salt = await bcrypt.genSalt(10);
