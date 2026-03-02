@@ -93,7 +93,7 @@ const getDashboardStats = asyncHandler(async (req, res) => {
 // @desc    Get All Bookings
 // @route   GET /api/admin/bookings
 // @access  Private/Admin
-const getAllBookings = asyncHandler(async (req, res) => {
+const getAllBookings = asyncHandler( async (req, res) => {
   const roomBookings = await Booking.find()
     .populate('user', 'name email')
     .populate('room', 'name')
