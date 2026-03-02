@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { adminAPI } from '@/lib/api'
 import AdminCharts from './components/AdminCharts'
 import AdminCarousel from './components/AdminCarousel'
+import AdminAIAssistant from './components/AdminAIAssistant'
 
 import FlipCard from './components/FlipCard'
 import { motion } from 'framer-motion'
@@ -12,6 +13,7 @@ export default function AdminDashboard() {
 
   const [stats, setStats] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [filteredBookings, setFilteredBookings] = useState([])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -25,6 +27,7 @@ export default function AdminDashboard() {
 
         const data = await adminAPI.getStats()
         setStats(data)
+        setFilteredBookings(data.recentBookings || [])
       } catch (error) {
         console.error("Admin Stats Fetch Error:", error.message)
         // If unauthorized, the API interceptor should handle it, but we can also set local error state
@@ -76,8 +79,52 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleAICommand = (command) => {
+    if (!stats || !stats.recentBookings) return;
+    
+    let result = [...stats.recentBookings];
+
+    if (command.action === 'filter') {
+      const { field, value } = command;
+      if (field && value) {
+        result = result.filter(b => {
+          const bValue = b[field]?.toLowerCase();
+          return bValue && bValue.includes(value.toLowerCase());
+        });
+      }
+    } else if (command.action === 'sort') {
+      const { field, order } = command;
+      if (field === 'price') {
+        result.sort((a, b) => {
+          const aPrice = a.pricing?.total || 0;
+          const bPrice = b.pricing?.total || 0;
+          return order === 'asc' ? aPrice - bPrice : bPrice - aPrice;
+        });
+      } else if (field === 'date') {
+        result.sort((a, b) => {
+          const aDate = new Date(a.createdAt).getTime();
+          const bDate = new Date(b.createdAt).getTime();
+          return order === 'asc' ? aDate - bDate : bDate - aDate;
+        });
+      }
+    } else if (command.action === 'search') {
+      const { query } = command;
+      if (query) {
+        const lowerQ = query.toLowerCase();
+        result = result.filter(b => {
+          const nameMatch = (b.guestDetails?.fullName || b.user?.name || "").toLowerCase().includes(lowerQ);
+          const emailMatch = (b.user?.email || b.guestDetails?.email || "").toLowerCase().includes(lowerQ);
+          return nameMatch || emailMatch;
+        });
+      }
+    }
+
+    setFilteredBookings(result);
+  };
+
   return (
     <div className="relative min-h-screen bg-neutral-950 text-neutral-200 overflow-hidden font-sans selection:bg-orange-500/30">
+        <AdminAIAssistant onApplyAICommand={handleAICommand} />
       
       {/* =======================
           LIVE BACKGROUND LAYER 
@@ -210,7 +257,7 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {stats.recentBookings.map((booking) => (
+                {filteredBookings.map((booking) => (
                   <tr key={booking._id} className="hover:bg-white/5 transition-colors">
                     <td className="p-4">
                       <div className="font-medium text-neutral-200">{booking.guestDetails?.fullName || booking.user?.name}</div>
@@ -244,8 +291,8 @@ export default function AdminDashboard() {
                 ))}
               </tbody>
             </table>
-            {stats.recentBookings.length === 0 && (
-               <div className="p-8 text-center text-neutral-500">No bookings found.</div>
+            {filteredBookings.length === 0 && (
+               <div className="p-8 text-center text-neutral-500">No bookings found. Try a different query.</div>
             )}
           </div>
         </motion.div>

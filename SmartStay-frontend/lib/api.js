@@ -514,6 +514,11 @@ export const adminAPI = {
   getAllBookings: async () => {
     const response = await apiClient.get('/admin/bookings')
     return response.data
+  },
+
+  adminChat: async (message) => {
+    const response = await apiClient.post('/admin/chat', { message })
+    return response.data
   }
 }
 
