@@ -323,7 +323,7 @@ export const authAPI = {
   },
   
   signup: async (name, email, password, isAdminSignup = false) => {
-    const response = await apiClient.post('/auth', { 
+    const response = await apiClient.post('/auth/signup', { 
       name,
       email, 
       password,
