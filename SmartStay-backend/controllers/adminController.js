@@ -112,4 +112,81 @@ const getAllBookings = asyncHandler(async (req, res) => {
   res.json(mergedBookings);
 });
 
-module.exports = { getDashboardStats, getAllBookings };
+// @desc    Process Admin AI Command
+// @route   POST /api/admin/chat
+// @access  Private/Admin
+const processAdminAICommand = asyncHandler(async (req, res) => {
+  const { message } = req.body;
+  if (!message) {
+    return res.status(400).json({ error: "Message is required" });
+  }
+
+  // Use the global groq instance from server.js if possible, but it's better to instantiate it here if not shared.
+  // Actually, groq is initialized in server.js globally if it was declared without var/let/const or we can just require Groq.
+  const Groq = require('groq-sdk');
+  const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+
+  const systemPrompt = `You are an AI assistant for the SmartStay Hotel Admin Dashboard.
+Your job is to help the admin filter, sort, or search through their bookings data.
+You must analyze the admin's request and return a strict JSON object that the frontend can use to update the table.
+
+Available commands:
+1. FILTER
+- action: "filter"
+- target: "bookings"
+- field: "status", "paymentStatus", "type" (room or event)
+- value: string matched to field. (e.g., "pending", "confirmed", "paid")
+
+2. SORT
+- action: "sort"
+- target: "bookings"
+- field: "price", "date"
+- order: "asc", "desc"
+
+3. SEARCH
+- action: "search"
+- target: "bookings"
+- query: string (e.g., guest name or email)
+
+4. CONVERSATIONAL
+- action: "chat"
+- message: A friendly response acknowledging you can't filter that or answering a general admin question.
+
+You MUST reply ONLY with a valid JSON object. Do not include markdown formatting like \`\`\`json.
+Example 1: {"action": "filter", "target": "bookings", "field": "status", "value": "pending"}
+Example 2: {"action": "sort", "target": "bookings", "field": "price", "order": "desc"}
+Example 3: {"action": "chat", "message": "I can only help sort and filter bookings right now."}
+`;
+
+  try {
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: message },
+      ],
+      model: "llama-3.3-70b-versatile",
+      temperature: 0.1, // Keep it low for JSON predictability
+      max_tokens: 150,
+    });
+
+    let aiReply = chatCompletion.choices[0]?.message?.content || "{}";
+    
+    // Clean up potential markdown formatting if the AI ignores instructions
+    aiReply = aiReply.replace(/```json\s*/gi, '').replace(/```\s*/gi, '').trim();
+
+    let jsonResponse;
+    try {
+      jsonResponse = JSON.parse(aiReply);
+    } catch (e) {
+      console.error("Failed to parse AI response as JSON:", aiReply);
+      jsonResponse = { action: "chat", message: "Sorry, I couldn't understand that command." };
+    }
+
+    res.json(jsonResponse);
+  } catch (error) {
+    console.error("Admin AI Error:", error);
+    res.status(500).json({ error: "AI Assistant is currently unavailable." });
+  }
+});
+
+module.exports = { getDashboardStats, getAllBookings, processAdminAICommand };
