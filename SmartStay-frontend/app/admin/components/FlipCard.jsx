@@ -1,14 +1,21 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 
 export default function FlipCard({ frontContent, backContent, className = "" }) {
+  const [isFlipped, setIsFlipped] = useState(false);
+
   return (
-    <div className={`group h-full perspective-1000 ${className}`}>
+    <motion.div 
+      className={`group h-full perspective-1000 cursor-pointer ${className}`}
+      onHoverStart={() => setIsFlipped(true)}
+      onHoverEnd={() => setIsFlipped(false)}
+      onClick={() => setIsFlipped(!isFlipped)}
+    >
       <motion.div
         className="relative h-full w-full transition-all duration-500"
         style={{ transformStyle: "preserve-3d" }}
-        whileHover={{ rotateY: 180, scale: 1.02 }}
+        animate={{ rotateY: isFlipped ? 180 : 0, scale: isFlipped ? 1.02 : 1 }}
         transition={{ duration: 0.6 }}
       >
         {/* Front Face */}
@@ -30,6 +37,6 @@ export default function FlipCard({ frontContent, backContent, className = "" }) 
           {backContent}
         </div>
       </motion.div>
-    </div>
+    </motion.div>
   );
 }

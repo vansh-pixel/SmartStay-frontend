@@ -159,7 +159,7 @@ export default function AdminDashboard() {
                 frontContent={
                   <div className={`p-6 rounded-xl shadow-lg backdrop-blur-md bg-gradient-to-br ${stat.color} border ${stat.border} h-full flex flex-col justify-center items-center`}>
                     <h3 className={`text-sm uppercase tracking-wider font-semibold opacity-90 ${stat.text}`}>{stat.label}</h3>
-                    <p className="text-xs text-neutral-400 mt-2">Hover to reveal</p>
+                    <p className="text-xs text-neutral-400 mt-2">Tap/Hover to reveal</p>
                   </div>
                 }
                 backContent={
