@@ -121,11 +121,6 @@ const processAdminAICommand = asyncHandler(async (req, res) => {
     return res.status(400).json({ error: "Message is required" });
   }
 
-  // Use the global groq instance from server.js if possible, but it's better to instantiate it here if not shared.
-  // Actually, groq is initialized in server.js globally if it was declared without var/let/const or we can just require Groq.
-  const Groq = require('groq-sdk');
-  const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-
   const systemPrompt = `You are an AI assistant for the SmartStay Hotel Admin Dashboard.
 Your job is to help the admin filter, sort, or search through their bookings data.
 You must analyze the admin's request and return a strict JSON object that the frontend can use to update the table.
@@ -159,6 +154,12 @@ Example 3: {"action": "chat", "message": "I can only help sort and filter bookin
 `;
 
   try {
+    const Groq = require('groq-sdk');
+    if (!process.env.GROQ_API_KEY) {
+      throw new Error("GROQ_API_KEY environment variable is missing.");
+    }
+    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+
     const chatCompletion = await groq.chat.completions.create({
       messages: [
         { role: "system", content: systemPrompt },
