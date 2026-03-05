@@ -27,8 +27,9 @@ export default function AdminAIAssistant({ onApplyAICommand }) {
       if (response.action === "chat") {
         setMessages(prev => [...prev, { role: 'ai', text: response.message }])
       } else {
-        // It's a command
-        setMessages(prev => [...prev, { role: 'ai', text: `Got it! Applying ${response.action} command.` }])
+        // Use the AI's provided message or a fallback
+        const feedback = response.message || `Got it! Applying ${response.action} command.`
+        setMessages(prev => [...prev, { role: 'ai', text: feedback }])
         // Trigger parent callback to update the table
         if (onApplyAICommand) {
           onApplyAICommand(response)
