@@ -121,72 +121,112 @@ const processAdminAICommand = asyncHandler(async (req, res) => {
     return res.status(400).json({ error: "Message is required" });
   }
 
-  const systemPrompt = `You are an AI assistant for the SmartStay Hotel Admin Dashboard.
-Your job is to help the admin filter, sort, or search through their bookings data.
-You must analyze the admin's request and return a strict JSON object that the frontend can use to update the table.
+  const Groq = require('groq-sdk');
+  if (!process.env.GROQ_API_KEY) {
+    console.error("GROQ_API_KEY is missing");
+    return res.status(500).json({ error: "AI Assistant is currently unavailable." });
+  }
+  const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-Available commands:
-1. FILTER
-- action: "filter"
-- target: "bookings"
-- field: "status", "paymentStatus", "type" (room or event)
-- value: string matched to field. (e.g., "pending", "confirmed", "paid")
+  // 1. INTENT CLASSIFICATION PASS
+  const intentPrompt = `You are a classifier for a Hotel Admin AI.
+Current Date: ${new Date().toDateString()}
+Analyze the request: "${message}"
 
-2. SORT
-- action: "sort"
-- target: "bookings"
-- field: "price", "date"
-- order: "asc", "desc"
+Classify into one of these types:
+- filter: Sorting/filtering the current visible table (status, payment, type).
+- sort: Sorting the current table (price, date).
+- search: Basic keyword search in the current table.
+- availability: Checking if rooms are free on a specific date.
+- lookup: Searching for a specific client/guest details across all time.
+- chat: General conversation.
 
-3. SEARCH
-- action: "search"
-- target: "bookings"
-- query: string (e.g., guest name or email)
-
-4. CONVERSATIONAL
-- action: "chat"
-- message: A friendly response acknowledging you can't filter that or answering a general admin question.
-
-You MUST reply ONLY with a valid JSON object. Do not include markdown formatting like \`\`\`json.
-Example 1: {"action": "filter", "target": "bookings", "field": "status", "value": "pending"}
-Example 2: {"action": "sort", "target": "bookings", "field": "price", "order": "desc"}
-Example 3: {"action": "chat", "message": "I can only help sort and filter bookings right now."}
-`;
+Return ONLY a JSON object:
+{"intent": "intent_name", "params": {"date": "YYYY-MM-DD", "query": "search_term", "field": "field_name", "value": "field_value", "order": "asc/desc"}}`;
 
   try {
-    const Groq = require('groq-sdk');
-    if (!process.env.GROQ_API_KEY) {
-      throw new Error("GROQ_API_KEY environment variable is missing.");
-    }
-    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-
-    const chatCompletion = await groq.chat.completions.create({
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: message },
-      ],
+    const classification = await groq.chat.completions.create({
+      messages: [{ role: "system", content: intentPrompt }],
       model: "llama-3.3-70b-versatile",
-      temperature: 0.1, // Keep it low for JSON predictability
-      max_tokens: 150,
+      temperature: 0,
+      response_format: { type: "json_object" }
     });
 
-    let aiReply = chatCompletion.choices[0]?.message?.content || "{}";
-    
-    // Clean up potential markdown formatting if the AI ignores instructions
-    aiReply = aiReply.replace(/```json\s*/gi, '').replace(/```\s*/gi, '').trim();
+    const parsedIntent = JSON.parse(classification.choices[0].message.content);
+    const { intent, params } = parsedIntent;
 
-    let jsonResponse;
-    try {
-      jsonResponse = JSON.parse(aiReply);
-    } catch (e) {
-      console.error("Failed to parse AI response as JSON:", aiReply);
-      jsonResponse = { action: "chat", message: "Sorry, I couldn't understand that command." };
+    // 2. DATA FETCHING BASED ON INTENT
+    if (intent === 'availability') {
+      const searchDate = params.date ? new Date(params.date) : new Date();
+      if (isNaN(searchDate.getTime())) {
+        return res.json({ action: "chat", message: "I couldn't understand the date you mentioned. Please use a format like YYYY-MM-DD." });
+      }
+
+      const rooms = await Room.find({}).lean();
+      const bookedOnDate = await Booking.find({
+        checkIn: { $lt: new Date(searchDate.getTime() + 86400000) },
+        checkOut: { $gt: searchDate },
+        status: { $ne: 'cancelled' }
+      }).select('room').lean();
+
+      const bookedRoomIds = bookedOnDate.map(b => b.room.toString());
+      const availableRooms = rooms.filter(r => !bookedRoomIds.includes(r._id.toString()));
+
+      let responseMsg = `On ${searchDate.toDateString()}, we have ${availableRooms.length} rooms available:\n`;
+      availableRooms.forEach(r => {
+        responseMsg += `- ${r.name} (₹${r.price}/night)\n`;
+      });
+
+      if (availableRooms.length === 0) responseMsg = `Sorry, all rooms are booked for ${searchDate.toDateString()}.`;
+      return res.json({ action: "chat", message: responseMsg });
     }
 
-    res.json(jsonResponse);
+    if (intent === 'lookup') {
+      const query = params.query || message;
+      const bookings = await Booking.find({
+        $or: [
+          { 'guestDetails.fullName': { $regex: query, $options: 'i' } },
+          { 'guestDetails.email': { $regex: query, $options: 'i' } }
+        ]
+      }).populate('room').limit(3).lean();
+
+      if (bookings.length === 0) {
+        return res.json({ action: "chat", message: `I couldn't find any bookings for "${query}".` });
+      }
+
+      let responseMsg = `I found ${bookings.length} booking(s) for "${query}":\n\n`;
+      bookings.forEach(b => {
+        responseMsg += `--- BOOKING #${b._id.toString().slice(-6).toUpperCase()} ---\n`;
+        responseMsg += `Guest: ${b.guestDetails.fullName} (${b.guestDetails.email})\n`;
+        responseMsg += `Room: ${b.room?.name || 'Unknown'}\n`;
+        responseMsg += `Dates: ${new Date(b.checkIn).toLocaleDateString()} to ${new Date(b.checkOut).toLocaleDateString()}\n`;
+        responseMsg += `Status: ${b.status} | Payment: ${b.paymentStatus}\n`;
+        responseMsg += `Invoice Total: ₹${b.pricing?.total}\n`;
+        responseMsg += `Details: ${b.pricing?.nights} nights, ${b.guestDetails.adults} adults.\n\n`;
+      });
+
+      return res.json({ action: "chat", message: responseMsg });
+    }
+
+    // 3. FALLBACK TO COMMAND GENERATION FOR FRONTEND (FE-side filtering/sorting)
+    // We reuse the original system prompt logic for command-based intents
+    const commandPrompt = `You are a Hotel Admin AI. Classify the request into a JSON command for the dashboard table.
+Available: filter (status, paymentStatus, type), sort (price, date), search (query), chat (message).
+Request: "${message}"
+Return ONLY JSON. Example: {"action": "filter", "field": "status", "value": "pending"}`;
+
+    const commandRes = await groq.chat.completions.create({
+      messages: [{ role: "system", content: commandPrompt }],
+      model: "llama-3.3-70b-versatile",
+      temperature: 0,
+      response_format: { type: "json_object" }
+    });
+
+    res.json(JSON.parse(commandRes.choices[0].message.content));
+
   } catch (error) {
     console.error("Admin AI Error:", error);
-    res.status(500).json({ error: "AI Assistant is currently unavailable." });
+    res.status(500).json({ error: "AI Assistant encountered an error." });
   }
 });
 
