@@ -6,7 +6,7 @@ import { adminAPI } from '@/lib/api'
 export default function AdminAIAssistant({ onApplyAICommand }) {
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState([
-    { role: 'ai', text: 'Hi! I can help you filter or sort bookings. For example, say "Show me pending room bookings" or "Sort by highest price".' }
+    { role: 'ai', text: 'Hi! I can help you filter/sort bookings, check availability for any date, or lookup specific guest details and invoices. Try saying "Is there a room on Friday?" or "Find Vansh\'s booking".' }
   ])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
