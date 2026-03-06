@@ -12,7 +12,7 @@ const newRooms = [
     name: "Presidential Penthouse",
     price: "₹85,000",
     basePrice: 85000,
-    image: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?q=80&w=2070&auto=format&fit=crop",
+    image: "/presidential-penthouse.png",
     description: "The crown jewel of SmartStay. This top-floor penthouse features a private infinity pool, massive terrace, and personal butler service.",
     size: "150 sqm",
     bedType: "California King + 2 Queen Beds",
@@ -26,9 +26,9 @@ const newRooms = [
       { label: "Smart Home System", icon: "smarthome" }
     ],
     images: [
-      { type: "main", url: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?q=80&w=2070&auto=format&fit=crop", label: "Living Area" },
-      { type: "pool", url: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=2070&auto=format&fit=crop", label: "Private Pool" },
-      { type: "bedroom", url: "https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=2074&auto=format&fit=crop", label: "Master Bedroom" }
+      { type: "main", url: "/presidential-penthouse.png", label: "Living Area" },
+      { type: "pool", url: "/pool-side.png", label: "Private Pool" },
+      { type: "bedroom", url: "/cozy-standard-room.png", label: "Master Bedroom" }
     ]
   },
   {
@@ -36,7 +36,7 @@ const newRooms = [
     name: "Family Garden Suite",
     price: "₹35,000",
     basePrice: 35000,
-    image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=2070&auto=format&fit=crop",
+    image: "/pool-side.png",
     description: "A perfect retreat for families, featuring direct access to our lush tropical gardens and a dedicated play area for children.",
     size: "75 sqm",
     bedType: "2 Queen Beds + Sofa Bed",
@@ -49,8 +49,8 @@ const newRooms = [
       { label: "Free Wi-Fi", icon: "wifi" }
     ],
     images: [
-      { type: "main", url: "https://images.unsplash.com/photo-1566665797739-1674de7a421a?q=80&w=2074&auto=format&fit=crop", label: "Room View" },
-      { type: "garden", url: "https://images.unsplash.com/photo-1533619239233-6280475a634a?q=80&w=2070&auto=format&fit=crop", label: "Garden View" }
+      { type: "main", url: "/luxury-interior.png", label: "Room View" },
+      { type: "garden", url: "/family-garden-suite.png", label: "Garden View" }
     ]
   },
   {
@@ -58,7 +58,7 @@ const newRooms = [
     name: "Cozy Standard Room",
     price: "₹12,000",
     basePrice: 12000,
-    image: "https://images.unsplash.com/photo-1595576508898-0ad5c879a061?q=80&w=1974&auto=format&fit=crop",
+    image: "/cozy-standard-room.png",
     description: "A compact yet stylish room designed for solo travelers or couples looking for a comfortable and budget-friendly stay.",
     size: "25 sqm",
     bedType: "Queen Bed",
@@ -70,7 +70,7 @@ const newRooms = [
       { label: "Smart TV", icon: "tv" }
     ],
     images: [
-      { type: "main", url: "https://images.unsplash.com/photo-1595576508898-0ad5c879a061?q=80&w=1974&auto=format&fit=crop", label: "Room Overview" }
+      { type: "main", url: "/cozy-standard-room.png", label: "Room Overview" }
     ]
   }
 ];

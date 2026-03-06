@@ -3,9 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const IMAGES = [
-  "https://images.unsplash.com/photo-1573843981267-be1999ff37cd?q=80&w=1974&auto=format&fit=crop", // Maldives Resort
-  "https://images.unsplash.com/photo-1540541338287-41700207dee6?q=80&w=2070&auto=format&fit=crop", // Pool Side
-  "https://images.unsplash.com/photo-1610641818989-c2051b5e2cfd?q=80&w=2070&auto=format&fit=crop"  // Luxury Room
+  "/maldives.png", // Maldives Resort
+  "/pool-side.png", // Pool Side
+  "/luxury-room.png"  // Luxury Room
 ];
 
 export default function AdminCarousel() {

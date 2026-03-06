@@ -39,14 +39,14 @@
         "title": "History of SmartStay",
         "primaryText": "At Hotel SmartStay, we have been committed to providing exceptional hospitality for over 8 years. Our journey began with a simple mission: to create a welcoming space where guests feel at home while enjoying world-class amenities and services.",
         "secondaryText": "From our humble beginnings, we have grown into one of Ahmedabad's most trusted hotel destinations, serving thousands of satisfied guests annually with warmth and dedication.",
-        "image": "https://images.unsplash.com/photo-1505691938895-1758d7feb511",
+        "image": "/about-hotel.png",
         "imageAlt": "Modern hotel architecture"
       },
       {
         "title": "Why Choose Us?",
         "primaryText": "We stand out from the competition through our unwavering commitment to excellence. Our team goes the extra mile to ensure every guest receives personalized attention, cutting-edge technology, and exceptional service that exceeds expectations.",
         "secondaryText": "With a strategic location, modern facilities, and highly trained staff, Hotel SmartStay offers the perfect blend of comfort, convenience, and luxury. We're not just a place to stay—we're your home away from home.",
-        "image": "https://images.unsplash.com/photo-1523217582562-09d0def993a6",
+        "image": "/luxury-interior.png",
         "imageAlt": "Luxury hotel interior"
       }
     ],
@@ -151,22 +151,22 @@
         },
         {
           "type": "bed",
-          "url": "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85",
+          "url": "/cozy-standard-room.png",
           "label": "Bed View"
         },
         {
           "type": "bathroom",
-          "url": "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14",
+          "url": "/luxury-room.png",
           "label": "Bathroom"
         },
         {
           "type": "balcony",
-          "url": "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688",
+          "url": "/pool-side.png",
           "label": "Balcony"
         },
         {
           "type": "amenities",
-          "url": "https://images.unsplash.com/photo-1578683010236-d716f9a3f461",
+          "url": "/presidential-penthouse.png",
           "label": "Amenities"
         }
       ]
@@ -215,22 +215,22 @@
         },
         {
           "type": "bed",
-          "url": "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85",
+          "url": "/cozy-standard-room.png",
           "label": "Bed View"
         },
         {
           "type": "bathroom",
-          "url": "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14",
+          "url": "/luxury-room.png",
           "label": "Bathroom"
         },
         {
           "type": "balcony",
-          "url": "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688",
+          "url": "/pool-side.png",
           "label": "Balcony"
         },
         {
           "type": "amenities",
-          "url": "https://images.unsplash.com/photo-1578683010236-d716f9a3f461",
+          "url": "/presidential-penthouse.png",
           "label": "Amenities"
         }
       ]
@@ -287,22 +287,22 @@
         },
         {
           "type": "bed",
-          "url": "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85",
+          "url": "/cozy-standard-room.png",
           "label": "Bed View"
         },
         {
           "type": "bathroom",
-          "url": "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14",
+          "url": "/luxury-room.png",
           "label": "Bathroom"
         },
         {
           "type": "balcony",
-          "url": "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688",
+          "url": "/pool-side.png",
           "label": "Balcony"
         },
         {
           "type": "amenities",
-          "url": "https://images.unsplash.com/photo-1578683010236-d716f9a3f461",
+          "url": "/presidential-penthouse.png",
           "label": "Amenities"
         }
       ]
