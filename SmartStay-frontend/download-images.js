@@ -1,13 +1,15 @@
 const fs = require('fs');
 const https = require('https');
-const http = require('http');
 
 const download = (url, dest, cb) => {
-  const lib = url.startsWith('https') ? https : http;
   const file = fs.createWriteStream(dest);
-  const request = lib.get(url, { rejectUnauthorized: false }, function(response) {
+  https.get(url, {
+    rejectUnauthorized: false,
+    headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+    }
+  }, function(response) {
     if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
-      // Handle redirects
       return download(response.headers.location, dest, cb);
     }
     response.pipe(file);
@@ -20,19 +22,18 @@ const download = (url, dest, cb) => {
   });
 };
 
-// Use generic reliable placeholder images instead of Unsplash
 const images = [
-  { url: 'https://placehold.co/1920x1080/4f46e5/FFFFFF/png?text=SmartStay+About+Hotel', dest: 'public/about-hotel.png' },
-  { url: 'https://placehold.co/1920x1080/4f46e5/FFFFFF/png?text=SmartStay+Luxury+Interior', dest: 'public/luxury-interior.png' },
-  { url: 'https://placehold.co/1920x1080/4f46e5/FFFFFF/png?text=Presidential+Penthouse', dest: 'public/presidential-penthouse.png' },
-  { url: 'https://placehold.co/1920x1080/4f46e5/FFFFFF/png?text=Family+Garden+Suite', dest: 'public/family-garden-suite.png' },
-  { url: 'https://placehold.co/1920x1080/4f46e5/FFFFFF/png?text=Cozy+Standard+Room', dest: 'public/cozy-standard-room.png' },
-  { url: 'https://placehold.co/1920x1080/4f46e5/FFFFFF/png?text=Maldives+Resort', dest: 'public/maldives.png' },
-  { url: 'https://placehold.co/1920x1080/4f46e5/FFFFFF/png?text=Pool+Side', dest: 'public/pool-side.png' },
-  { url: 'https://placehold.co/1920x1080/4f46e5/FFFFFF/png?text=Luxury+Room', dest: 'public/luxury-room.png' },
-  { url: 'https://placehold.co/1920x1080/4f46e5/FFFFFF/png?text=Grand+Ballroom', dest: 'public/grand-ballroom.png' },
-  { url: 'https://placehold.co/1920x1080/4f46e5/FFFFFF/png?text=Executive+Boardroom', dest: 'public/executive-boardroom.png' },
-  { url: 'https://placehold.co/1920x1080/4f46e5/FFFFFF/png?text=Crystal+Banquet', dest: 'public/crystal-banquet.png' }
+  { url: 'https://images.pexels.com/photos/164595/pexels-photo-164595.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', dest: 'public/about-hotel.png' },
+  { url: 'https://images.pexels.com/photos/2733918/pexels-photo-2733918.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', dest: 'public/luxury-interior.png' },
+  { url: 'https://images.pexels.com/photos/3315291/pexels-photo-3315291.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', dest: 'public/presidential-penthouse.png' },
+  { url: 'https://images.pexels.com/photos/262048/pexels-photo-262048.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', dest: 'public/family-garden-suite.png' },
+  { url: 'https://images.pexels.com/photos/271618/pexels-photo-271618.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', dest: 'public/cozy-standard-room.png' },
+  { url: 'https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', dest: 'public/maldives.png' },
+  { url: 'https://images.pexels.com/photos/3120613/pexels-photo-3120613.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', dest: 'public/pool-side.png' },
+  { url: 'https://images.pexels.com/photos/648019/pexels-photo-648019.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', dest: 'public/luxury-room.png' },
+  { url: 'https://images.pexels.com/photos/103124/pexels-photo-103124.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', dest: 'public/grand-ballroom.png' },
+  { url: 'https://images.pexels.com/photos/1181414/pexels-photo-1181414.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', dest: 'public/executive-boardroom.png' },
+  { url: 'https://images.pexels.com/photos/2263436/pexels-photo-2263436.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', dest: 'public/crystal-banquet.png' }
 ];
 
 Promise.all(images.map(img => new Promise((resolve, reject) => {
