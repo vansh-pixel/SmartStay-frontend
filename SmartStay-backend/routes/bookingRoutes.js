@@ -17,7 +17,7 @@ const { protect, admin } = require('../middleware/authMiddleware');
 router.get('/availability/:roomId', getBookedDates);
 
 // 0.1 Admin Manual Booking
-router.post('/admin', protect, admin, createAdminBooking);
+router.post('/manual-entry', protect, admin, createAdminBooking);
 
 // 1. Create a new booking
 router.post('/', protect, createBooking);

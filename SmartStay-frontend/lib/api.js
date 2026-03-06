@@ -229,7 +229,15 @@
 
 import axios from 'axios'
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
+// 💡 ROBUST FALLBACK: If Vercel env is missing, default to Render in production, otherwise localhost.
+const isProd = process.env.NODE_ENV === 'production' || 
+               (typeof window !== 'undefined' && window.location.hostname !== 'localhost');
+
+let API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+if (!API_BASE_URL || API_BASE_URL.includes('localhost')) {
+  API_BASE_URL = isProd ? 'https://smartstay-backend-ibsr.onrender.com/api' : 'http://localhost:5000/api';
+}
+
 const API_TIMEOUT = 10000 
 
 const apiClient = axios.create({
@@ -303,7 +311,7 @@ apiClient.interceptors.response.use(
       }
 
     } else if (error.request) {
-      error.message = 'Unable to reach server. Is backend running on port 5000?'
+      error.message = 'Network Error: ' + (error.message || 'Unable to reach the backend server.');
     } else if (error.code === 'ECONNABORTED') {
       error.message = 'Request timeout.'
     }
@@ -373,7 +381,7 @@ export const bookingAPI = {
 
   // 👇 ADMIN: Create Booking Manually
   createAdminBooking: async (bookingData) => {
-    const response = await apiClient.post('/bookings/admin', bookingData);
+    const response = await apiClient.post('/bookings/manual-entry', bookingData);
     return response.data;
   },
   
@@ -554,14 +562,14 @@ export const hallAPI = {
    ========================= */
 export const paymentAPI = {
   createPaymentIntent: async (roomId, nights) => {
-    const response = await apiClient.post('/payment/create-payment-intent', {
+    const response = await apiClient.post('/checkout/create-payment-intent', {
       roomId,
       nights
     })
     return response.data
   },
   createEventPaymentIntent: async (data) => {
-    const response = await apiClient.post('/payment/create-event-payment-intent', data)
+    const response = await apiClient.post('/checkout/create-event-payment-intent', data)
     return response.data
   }
 }

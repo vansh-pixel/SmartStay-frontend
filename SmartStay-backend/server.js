@@ -63,7 +63,7 @@ app.use('/api/bookings', require('./routes/bookingRoutes'));
 app.use('/api/users', userRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/support', supportRoutes);
-app.use('/api/payment', require('./routes/paymentRoutes'));
+app.use('/api/checkout', require('./routes/paymentRoutes'));
 app.use('/api/admin', adminRoutes);
 app.use('/api/halls', hallRoutes);
 // app.use("/api/admin", adminAuth);
