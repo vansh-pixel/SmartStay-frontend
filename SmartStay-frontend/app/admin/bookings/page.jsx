@@ -254,13 +254,13 @@ export default function AdminBookings() {
         <table className="custom-table w-full">
           <thead className="bg-gray-50 border-b border-gray-100">
             <tr>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">ID</th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Guest</th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Booking Item</th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Dates</th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Total</th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">ID</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">Guest</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">Booking Item</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">Dates</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">Status</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">Total</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
@@ -275,13 +275,14 @@ export default function AdminBookings() {
                   className="hover:bg-gray-50/80 transition-colors group"
                 >
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-500">#{booking._id.slice(-6)}</td>
-                  <td className="px-6 py-4">
-                    <div className="font-medium text-gray-900">{booking.guestDetails?.fullName || booking.user?.name}</div>
-                    <div className="text-xs text-gray-500">{booking.guestDetails?.email || booking.user?.email}</div>
+                  <td className="px-6 py-4 min-w-[150px]">
+                    <div className="font-medium text-gray-900 break-words line-clamp-2">{booking.guestDetails?.fullName || booking.user?.name}</div>
+                    <div className="text-xs text-gray-500 break-all line-clamp-1">{booking.guestDetails?.email || booking.user?.email}</div>
                   </td>
-                  <td className="px-6 py-4">
-                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${booking.type === 'event' ? 'bg-blue-50 text-blue-800' : 'bg-green-50 text-green-800'}`}>
-                        {booking.type === 'event' ? 'Event: ' : 'Room: '} {booking.type === 'event' ? booking.hall?.name : booking.room?.name}
+                  <td className="px-6 py-4 min-w-[200px]">
+                     <span className={`inline-flex flex-col sm:flex-row items-start sm:items-center px-2.5 py-1 sm:py-0.5 rounded-lg sm:rounded-full text-xs font-medium gap-1 sm:gap-2 ${booking.type === 'event' ? 'bg-blue-50 text-blue-800' : 'bg-green-50 text-green-800'}`}>
+                        <span className="whitespace-nowrap font-bold opacity-80">{booking.type === 'event' ? 'Event:' : 'Room:'}</span> 
+                        <span className="break-words line-clamp-2 whitespace-normal">{booking.type === 'event' ? booking.hall?.name : booking.room?.name}</span>
                      </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
@@ -298,7 +299,7 @@ export default function AdminBookings() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span 
-                       className={`status-badge px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                       className={`status-badge px-3 py-1 inline-block text-[10px] sm:text-xs leading-5 font-semibold rounded-full uppercase tracking-wide
                        ${['confirmed', 'completed'].includes(booking.status) || booking.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' : 
                          ['pending', 'unpaid'].includes(booking.status) || booking.paymentStatus === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
                          booking.status === 'cancelled' ? 'bg-red-100 text-red-800' : 

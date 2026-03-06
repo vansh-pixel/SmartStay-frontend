@@ -249,42 +249,42 @@ export default function AdminDashboard() {
             <table className="w-full text-left">
               <thead className="bg-white/5 text-neutral-400 border-b border-white/5">
                 <tr>
-                  <th className="p-4 font-semibold">Guest</th>
-                  <th className="p-4 font-semibold">Booking Item</th>
-                  <th className="p-4 font-semibold">Status</th>
-                  <th className="p-4 font-semibold">Date</th>
-                  <th className="p-4 font-semibold">Total</th>
+                  <th className="p-4 font-semibold whitespace-nowrap">Guest</th>
+                  <th className="p-4 font-semibold whitespace-nowrap">Booking Item</th>
+                  <th className="p-4 font-semibold whitespace-nowrap">Status</th>
+                  <th className="p-4 font-semibold whitespace-nowrap">Date</th>
+                  <th className="p-4 font-semibold whitespace-nowrap">Total</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
                 {filteredBookings.map((booking) => (
                   <tr key={booking._id} className="hover:bg-white/5 transition-colors">
-                    <td className="p-4">
-                      <div className="font-medium text-neutral-200">{booking.guestDetails?.fullName || booking.user?.name}</div>
-                      <div className="text-sm text-neutral-500">{booking.user?.email || booking.guestDetails?.email}</div>
+                    <td className="p-4 min-w-[150px]">
+                      <div className="font-medium text-neutral-200 break-words line-clamp-2">{booking.guestDetails?.fullName || booking.user?.name}</div>
+                      <div className="text-sm text-neutral-500 break-all line-clamp-1">{booking.user?.email || booking.guestDetails?.email}</div>
                     </td>
-                    <td className="p-4 text-neutral-300">
-                      <div className="flex items-center gap-2">
+                    <td className="p-4 text-neutral-300 min-w-[200px]">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
                         {booking.type === 'event' ? (
-                          <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded text-xs border border-blue-500/30">Event</span>
+                          <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded text-xs border border-blue-500/30 whitespace-nowrap">Event</span>
                         ) : (
-                          <span className="px-2 py-0.5 bg-green-500/20 text-green-400 rounded text-xs border border-green-500/30">Room</span>
+                          <span className="px-2 py-0.5 bg-green-500/20 text-green-400 rounded text-xs border border-green-500/30 whitespace-nowrap">Room</span>
                         )}
-                        <span>{booking.type === 'event' ? (booking.hall?.name || 'Unknown Hall') : (booking.room?.name || 'Unknown Room')}</span>
+                        <span className="break-words line-clamp-2">{booking.type === 'event' ? (booking.hall?.name || 'Unknown Hall') : (booking.room?.name || 'Unknown Room')}</span>
                       </div>
                     </td>
-                    <td className="p-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wide
+                    <td className="p-4 whitespace-nowrap">
+                      <span className={`inline-block px-3 py-1 rounded-full text-[10px] sm:text-xs font-medium uppercase tracking-wide
                         ${['confirmed', 'completed'].includes(booking.status) || booking.paymentStatus === 'paid' ? 'bg-green-500/20 text-green-300 border border-green-500/20' : 
                           ['pending', 'unpaid'].includes(booking.status) || booking.paymentStatus === 'pending' ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/20' : 
                           'bg-gray-500/20 text-gray-300 border border-gray-500/20'}`}>
                         {booking.status || booking.paymentStatus}
                       </span>
                     </td>
-                    <td className="p-4 text-neutral-400">
+                    <td className="p-4 text-neutral-400 whitespace-nowrap text-sm sm:text-base">
                       {new Date(booking.createdAt).toLocaleDateString()}
                     </td>
-                    <td className="p-4 font-bold text-neutral-200">
+                    <td className="p-4 font-bold text-neutral-200 whitespace-nowrap">
                       ₹{booking.pricing?.total?.toLocaleString()}
                     </td>
                   </tr>
