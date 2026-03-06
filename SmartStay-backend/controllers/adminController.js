@@ -143,11 +143,12 @@ Your capabilities:
 3. search: Keyword search in the current table (guest name, email).
 4. availability: Real-time DB check if rooms are free on a specific date.
 5. lookup: Deep DB search for guest history, details, and invoices.
-6. chat: General greeting or question.
+6. invoice: Specific request for generating or viewing an invoice for a guest or booking.
+7. chat: General greeting or question.
 
 Respond ONLY with JSON:
 {
-  "intent": "filter" | "sort" | "search" | "availability" | "lookup" | "chat",
+  "intent": "filter" | "sort" | "search" | "availability" | "lookup" | "invoice" | "chat",
   "params": {
     "date": "YYYY-MM-DD", 
     "query": "search term",
@@ -199,8 +200,8 @@ Respond ONLY with JSON:
       return res.json({ action: "chat", message: responseMsg });
     }
 
-    // --- CASE 2: DEEP GUEST LOOKUP ---
-    if (intent === 'lookup') {
+    // --- CASE 2: DEEP GUEST LOOKUP OR INVOICE ---
+    if (intent === 'lookup' || intent === 'invoice') {
       const query = params.query || message;
       const bookings = await Booking.find({
         $or: [
@@ -210,20 +211,11 @@ Respond ONLY with JSON:
       }).populate('room').sort({ createdAt: -1 }).limit(3).lean();
 
       if (bookings.length === 0) {
-        return res.json({ action: "chat", message: `🔍 No bookings found for "${query}".` });
+        return res.json({ action: "chat", message: `🔍 No bookings found matching that query.` });
       }
 
-      let responseMsg = `📋 Found ${bookings.length} booking(s) for "${query}":\n\n`;
-      bookings.forEach(b => {
-        responseMsg += `📍 [BOOKING #${b._id.toString().slice(-6).toUpperCase()}]\n`;
-        responseMsg += `👤 Guest: ${b.guestDetails.fullName}\n`;
-        responseMsg += `📧 Email: ${b.guestDetails.email}\n`;
-        responseMsg += `🏨 Room: ${b.room?.name || 'N/A'}\n`;
-        responseMsg += `📅 Support: ${new Date(b.checkIn).toLocaleDateString()} to ${new Date(b.checkOut).toLocaleDateString()}\n`;
-        responseMsg += `💰 Total Paid: ₹${b.pricing?.total}\n`;
-        responseMsg += `✅ Status: ${b.status.toUpperCase()}\n\n`;
-      });
-      return res.json({ action: "chat", message: responseMsg });
+      let responseMsg = `📋 Found ${bookings.length} booking(s):\n`;
+      return res.json({ action: "lookup", message: responseMsg, bookings: bookings });
     }
 
     // --- CASE 3: CHAT ---

@@ -26,6 +26,8 @@ export default function AdminAIAssistant({ onApplyAICommand }) {
       // If it's a chat message, just display it
       if (response.action === "chat") {
         setMessages(prev => [...prev, { role: 'ai', text: response.message }])
+      } else if (response.action === "lookup") {
+        setMessages(prev => [...prev, { role: 'ai', text: response.message, bookings: response.bookings }])
       } else {
         // Use the AI's provided message or a fallback
         const feedback = response.message || `Got it! Applying ${response.action} command.`
@@ -41,6 +43,99 @@ export default function AdminAIAssistant({ onApplyAICommand }) {
       setIsLoading(false)
     }
   }
+
+  const downloadInvoice = (booking) => {
+    const shortId = booking._id?.toString().slice(-6).toUpperCase() || 'N/A';
+    const guestName = booking.guestDetails?.fullName || 'N/A';
+    const guestEmail = booking.guestDetails?.email || 'N/A';
+    const guestPhone = booking.guestDetails?.phone || 'N/A';
+    const checkIn = new Date(booking.checkIn).toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+    const checkOut = new Date(booking.checkOut).toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+    const nights = booking.pricing?.nights || 1;
+    const total = booking.pricing?.total || 0;
+    const roomName = booking.room?.name || 'N/A';
+    const status = booking.status || 'confirmed';
+
+    const invoiceHTML = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; }
+    .header { text-align: center; border-bottom: 3px solid #ff8c42; padding-bottom: 20px; margin-bottom: 30px; }
+    .header h1 { color: #ff8c42; margin: 0; font-size: 32px; }
+    .booking-id { background: #ff8c42; color: white; padding: 8px 16px; border-radius: 20px; display: inline-block; margin-top: 10px; }
+    .section { margin-bottom: 30px; }
+    .section h2 { color: #333; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; font-size: 18px; }
+    .row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f5f5f5; }
+    .row span:first-child { color: #666; }
+    .row span:last-child { color: #1a1a1a; font-weight: 600; }
+    .total-row { border-top: 3px solid #ff8c42; margin-top: 15px; padding-top: 15px; font-size: 20px; font-weight: bold; }
+    .total-row span:last-child { color: #ff8c42; }
+    .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 2px solid #f0f0f0; color: #666; }
+    .status-badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 14px; font-weight: 600; text-transform: uppercase;}
+    .status-confirmed { background: #d4edda; color: #155724; }
+    .status-cancelled { background: #f8d7da; color: #721c24; }
+    .status-completed { background: #d1ecf1; color: #0c5460; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>HOTEL SMARTSTAY</h1>
+    <div class="booking-id">Booking ID: \${shortId}</div>
+    <p style="margin-top: 10px; color: #666;">Date: \${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+  </div>
+
+  <div class="section">
+    <h2>Booking Status</h2>
+    <div class="row">
+      <span>Status:</span>
+      <span class="status-badge status-\${status.toLowerCase()}">\${status}</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Guest Details</h2>
+    <div class="row"><span>Name:</span><span>\${guestName}</span></div>
+    <div class="row"><span>Email:</span><span>\${guestEmail}</span></div>
+    <div class="row"><span>Phone:</span><span>\${guestPhone}</span></div>
+  </div>
+
+  <div class="section">
+    <h2>Booking Details</h2>
+    <div class="row"><span>Room:</span><span>\${roomName}</span></div>
+    <div class="row"><span>Check-in:</span><span>\${checkIn}</span></div>
+    <div class="row"><span>Check-out:</span><span>\${checkOut}</span></div>
+    <div class="row"><span>Number of Nights:</span><span>\${nights}</span></div>
+  </div>
+
+  <div class="section">
+    <h2>Payment Summary</h2>
+    <div class="row"><span>Room Charges (\${nights} nights):</span><span>₹\${(total * 0.75).toFixed(2)}</span></div>
+    <div class="row"><span>Service Fee:</span><span>₹20.00</span></div>
+    <div class="row"><span>Taxes (18%):</span><span>₹\${(total * 0.15).toFixed(2)}</span></div>
+    <div class="row total-row"><span>Total Amount:</span><span>₹\${total.toFixed(2)}</span></div>
+  </div>
+
+  <div class="footer">
+    <p><strong>Thank you for choosing Hotel SmartStay!</strong></p>
+    <p>For any queries, please contact us at support@smartstay.com</p>
+  </div>
+</body>
+</html>
+    `;
+
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(invoiceHTML);
+      printWindow.document.close();
+      printWindow.onload = () => {
+        printWindow.focus();
+        printWindow.print();
+      };
+    }
+  };
 
   return (
     <>
@@ -110,7 +205,37 @@ export default function AdminAIAssistant({ onApplyAICommand }) {
                     transition={{ duration: 0.2 }}
                     className={`max-w-[85%] rounded-xl p-3 text-sm ${msg.role === 'ai' ? 'bg-neutral-800 text-neutral-200 self-start border border-white/5 shadow-sm rounded-tl-none' : 'bg-gradient-to-br from-orange-500/20 to-orange-600/10 text-orange-50 self-end border border-orange-500/30 rounded-tr-none shadow-[0_0_10px_rgba(249,115,22,0.1)]'}`}
                   >
-                    {msg.text}
+                    <p className="whitespace-pre-wrap">{msg.text}</p>
+                    {msg.bookings && msg.bookings.length > 0 && (
+                      <div className="mt-3 flex flex-col gap-3">
+                        {msg.bookings.map(b => (
+                          <div key={b._id} className="bg-neutral-900 justify-start p-3 rounded-lg border border-white/10 flex flex-col gap-1 text-xs">
+                            <div className="flex justify-between items-start">
+                              <span className="font-semibold text-orange-400 text-sm">{b.guestDetails?.fullName}</span>
+                              <span className="bg-white/10 px-2 py-0.5 rounded text-[10px] text-white/70 uppercase tracking-wider">{b.status}</span>
+                            </div>
+                            <p className="text-neutral-400">Email: {b.guestDetails?.email}</p>
+                            <p className="text-neutral-400">Phone: {b.guestDetails?.phone || 'N/A'}</p>
+                            <div className="h-px bg-white/10 my-1 w-full" />
+                            <p className="text-neutral-300">Room: <span className="text-neutral-100">{b.room?.name || 'N/A'}</span></p>
+                            <p className="text-neutral-300">Dates: <span className="text-neutral-100">{new Date(b.checkIn).toLocaleDateString()} to {new Date(b.checkOut).toLocaleDateString()}</span></p>
+                            <p className="text-neutral-300 font-medium mt-1">Total Paid: <span className="text-emerald-400">₹{b.pricing?.total}</span></p>
+                            
+                            <button 
+                              onClick={() => downloadInvoice(b)}
+                              className="mt-2 w-full bg-orange-600/20 hover:bg-orange-600/40 text-orange-400 border border-orange-500/30 transition-colors py-1.5 rounded flex items-center justify-center gap-1.5"
+                            >
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                              </svg>
+                              Get Invoice
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </motion.div>
                 ))}
                 {isLoading && (
