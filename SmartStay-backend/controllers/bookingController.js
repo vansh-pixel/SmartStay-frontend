@@ -21,10 +21,14 @@ const createBooking = async (req, res) => {
       return res.status(400).json({ message: "roomId is required" });
     }
 
-    // FIX: Search for room by custom 'id' (String "1" or Number 1)
-    let room = await Room.findOne({ id: roomId });
-    if (!room) {
+    // FIX: Search for room by custom 'id' (String "1" or Number 1) or ObjectId
+    const mongoose = require('mongoose');
+    let room = await Room.findOne({ id: String(roomId) });
+    if (!room && !isNaN(roomId)) {
        room = await Room.findOne({ id: Number(roomId) });
+    }
+    if (!room && mongoose.Types.ObjectId.isValid(roomId)) {
+       room = await Room.findById(roomId);
     }
     
     if (!room) {
@@ -270,9 +274,13 @@ const createAdminBooking = async (req, res) => {
       return res.status(400).json({ message: "roomId is required" });
     }
 
-    let room = await Room.findOne({ id: roomId });
-    if (!room) {
+    const mongoose = require('mongoose');
+    let room = await Room.findOne({ id: String(roomId) });
+    if (!room && !isNaN(roomId)) {
        room = await Room.findOne({ id: Number(roomId) });
+    }
+    if (!room && mongoose.Types.ObjectId.isValid(roomId)) {
+       room = await Room.findById(roomId);
     }
     if (!room) {
       return res.status(404).json({ message: 'Room not found' });
@@ -352,11 +360,15 @@ const createAdminBooking = async (req, res) => {
 
 const getBookedDates = async (req, res) => {
   try {
+    const mongoose = require('mongoose');
     const { roomId } = req.params;
-    // Try finding room by ID (String or Number)
-    let room = await Room.findOne({ id: roomId });
-    if (!room) {
+    // Try finding room by ID (String, Number, or ObjectId)
+    let room = await Room.findOne({ id: String(roomId) });
+    if (!room && !isNaN(roomId)) {
       room = await Room.findOne({ id: Number(roomId) });
+    }
+    if (!room && mongoose.Types.ObjectId.isValid(roomId)) {
+      room = await Room.findById(roomId);
     }
     
     if (!room) {

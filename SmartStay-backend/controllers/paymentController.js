@@ -19,13 +19,20 @@ const createPaymentIntent = async (req, res) => {
     });
     // 👆 END SPY CODE
 
-    // Try finding it as a Number first
-    let room = await Room.findOne({ id: Number(roomId) });
+    const mongoose = require('mongoose');
+    
+    // Try finding it as a String or Number custom ID
+    let room = await Room.findOne({ id: String(roomId) });
+    
+    if (!room && !isNaN(roomId)) {
+      console.log("⚠️ Not found as String, trying as Number...");
+      room = await Room.findOne({ id: Number(roomId) });
+    }
 
-    // If not found, try finding it as a String
-    if (!room) {
-      console.log("⚠️ Not found as Number, trying as String...");
-      room = await Room.findOne({ id: String(roomId) });
+    // Try finding it as a MongoDB ObjectId
+    if (!room && mongoose.Types.ObjectId.isValid(roomId)) {
+      console.log("⚠️ Not found as custom ID, trying as ObjectId...");
+      room = await Room.findById(roomId);
     }
 
     if (!room) {
