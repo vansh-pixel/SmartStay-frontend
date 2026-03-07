@@ -245,8 +245,9 @@ export default function AdminBookingModal({ isOpen, onClose, onBookingCreated })
                          priceVal = parseFloat(room.price.replace(/[^0-9.]/g, ''));
                       }
                       
+                      const roomIdVal = room.id || room._id;
                       return (
-                        <option key={room.id} value={room.id}>{room.name} (₹{priceVal}/night)</option>
+                        <option key={room._id || room.id} value={roomIdVal}>{room.name} (₹{priceVal}/night)</option>
                       );
                     })}
                   </select>
