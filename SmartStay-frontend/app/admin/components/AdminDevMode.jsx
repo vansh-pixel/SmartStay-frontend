@@ -39,22 +39,24 @@ flowchart LR
       "System Overview": {
         title: "SmartStay Primary Use Cases",
         code: `
-usecaseDiagram
-    actor "Guest (Client)" as G
-    actor "Admin" as A
-    actor "Stripe System" as S
+flowchart LR
+    %% Actors
+    G((Guest\\nClient)):::actor
+    A((Admin)):::actor
+    S((Stripe\\nSystem)):::actor
     
-    package "SmartStay App" {
-      usecase "Browse Rooms" as UC1
-      usecase "Filter & Search" as UC2
-      usecase "Book Room" as UC3
-      usecase "Leave Review" as UC4
-      
-      usecase "Manage Rooms" as UC5
-      usecase "View Bookings" as UC6
-      usecase "Process Payments" as UC7
-    }
+    %% Use Cases
+    subgraph App [SmartStay App]
+        UC1([Browse Rooms]):::usecase
+        UC2([Filter & Search]):::usecase
+        UC3([Book Room]):::usecase
+        UC4([Leave Review]):::usecase
+        UC5([Manage Rooms]):::usecase
+        UC6([View Bookings]):::usecase
+        UC7([Process Payments]):::usecase
+    end
     
+    %% Connections
     G --> UC1
     G --> UC2
     G --> UC3
@@ -62,9 +64,14 @@ usecaseDiagram
     
     A --> UC5
     A --> UC6
+    A --> UC6
     
-    UC3 ..> UC7 : <<includes>>
+    UC3 -.->|includes| UC7
     S --> UC7
+    
+    %% Styles
+    classDef actor fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#fff
+    classDef usecase fill:#1e293b,stroke:#a855f7,stroke-width:2px,color:#fff,stroke-dasharray: 5 5
         `,
         description: "A high-level view of the primary interactions between various actors and the core modules of the SmartStay app."
       }
