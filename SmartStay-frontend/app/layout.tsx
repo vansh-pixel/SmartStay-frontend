@@ -5,7 +5,6 @@ import "./globals.css"
 import GoogleAuthProvider from "@/components/GoogleAuthProvider";
 import CustomCursor from "@/components/CustomCursor";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import DiagramModeWrapper from "@/components/DiagramModeWrapper";
 
 export const metadata: Metadata = {
   title: "Hotel SmartStay - Luxury Accommodation in Ahmedabad",
@@ -47,7 +46,6 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <CustomCursor /> {/* Global Cursor */}
-            <DiagramModeWrapper /> {/* Conditional Diagram Interceptor */}
             {children}
             <Analytics />
           </ThemeProvider>

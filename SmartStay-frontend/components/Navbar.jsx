@@ -17,7 +17,6 @@ const Navbar = forwardRef((props, ref) => {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false)
   const [userName, setUserName] = useState("")
   const [authMode, setAuthMode] = useState("user") // "user" or "admin"
-  const [isDiagramMode, setIsDiagramMode] = useState(false)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -116,12 +115,6 @@ const Navbar = forwardRef((props, ref) => {
     setIsProfileModalOpen(false)
   }
 
-  const toggleDiagramMode = () => {
-    const newState = !isDiagramMode;
-    setIsDiagramMode(newState);
-    window.dispatchEvent(new CustomEvent('diagramModeToggle', { detail: { isActive: newState } }));
-  };
-
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -201,15 +194,6 @@ const Navbar = forwardRef((props, ref) => {
                   Logout
                 </a>
               </li>
-              <li className="mobile-only mt-2">
-                <button 
-                  onClick={() => { toggleDiagramMode(); setIsMobileMenuOpen(false); }}
-                  className="w-full text-left px-4 py-2 rounded-lg font-bold"
-                  style={{ backgroundColor: isDiagramMode ? '#0ea5e9' : 'transparent', color: isDiagramMode ? '#fff' : '#0ea5e9', border: '1px solid #0ea5e9' }}
-                >
-                  {isDiagramMode ? 'Dev Mode: ON' : 'Dev Mode: OFF'}
-                </button>
-              </li>
             </>
           ) : (
             <>
@@ -233,15 +217,6 @@ const Navbar = forwardRef((props, ref) => {
                   Admin Portal
                 </a>
               </li>
-              <li className="mobile-only mt-2 border-t border-slate-700 pt-2">
-                <button 
-                  onClick={() => { toggleDiagramMode(); setIsMobileMenuOpen(false); }}
-                  className="w-full text-left px-4 py-2 rounded-lg font-bold"
-                  style={{ backgroundColor: isDiagramMode ? '#0ea5e9' : 'transparent', color: isDiagramMode ? '#fff' : '#0ea5e9', border: '1px solid #0ea5e9' }}
-                >
-                  {isDiagramMode ? 'Dev Mode: ON' : 'Dev Mode: OFF'}
-                </button>
-              </li>
             </>
           )}
 
@@ -250,23 +225,6 @@ const Navbar = forwardRef((props, ref) => {
 
         {isLoggedIn ? (
           <div className="profile-dropdown-container flex items-center gap-4">
-            <button 
-              className="logout-btn hover:scale-105 transition-transform flex items-center gap-1" 
-              onClick={toggleDiagramMode}
-              style={{
-                backgroundColor: isDiagramMode ? '#0ea5e9' : 'transparent',
-                border: '1px solid #0ea5e9',
-                color: isDiagramMode ? '#fff' : '#0ea5e9',
-                padding: '8px 16px',
-                borderRadius: '25px',
-                fontSize: '14px'
-              }}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
-              </svg>
-              {isDiagramMode ? 'Mode: ON' : 'Dev Mode'}
-            </button>
             <button className="profile-btn" onClick={toggleProfileDropdown}>
               <div className="profile-avatar-small">
                 {userName.charAt(0).toUpperCase()}
@@ -316,22 +274,6 @@ const Navbar = forwardRef((props, ref) => {
           </div>
         ) : (
           <div className="auth-buttons" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-            <button 
-              className="logout-btn hover:scale-105 transition-transform flex items-center gap-1" 
-              onClick={toggleDiagramMode}
-              style={{
-                backgroundColor: isDiagramMode ? '#0ea5e9' : 'transparent',
-                border: '1px solid #0ea5e9',
-                color: isDiagramMode ? '#fff' : '#0ea5e9',
-                padding: '8px 16px',
-                borderRadius: '25px',
-              }}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
-              </svg>
-              {isDiagramMode ? 'Mode: ON' : 'Dev Mode'}
-            </button>
             <button 
               className="logout-btn hover:scale-105 transition-transform" 
               onClick={() => {
