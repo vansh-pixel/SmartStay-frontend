@@ -36,24 +36,22 @@ flowchart LR
       }
     },
     "Use Cases": {
-      "System Overview": {
-        title: "SmartStay Primary Use Cases",
+      "Client / Guest": {
+        title: "Guest (Client) Use Cases",
         code: `
 flowchart LR
     %% Actors
     G((Guest\\nClient)):::actor
-    A((Admin)):::actor
-    S((Stripe\\nSystem)):::actor
     
     %% Use Cases
-    subgraph App [SmartStay App]
+    subgraph App [SmartStay Storefront]
         UC1([Browse Rooms]):::usecase
         UC2([Filter & Search]):::usecase
-        UC3([Book Room]):::usecase
-        UC4([Leave Review]):::usecase
-        UC5([Manage Rooms]):::usecase
-        UC6([View Bookings]):::usecase
-        UC7([Process Payments]):::usecase
+        UC3([View Details]):::usecase
+        UC4([Book Room & Dates]):::usecase
+        UC5([Leave Review]):::usecase
+        UC6([Chat with AI Support]):::usecase
+        UC7([Manage Profile]):::usecase
     end
     
     %% Connections
@@ -61,19 +59,112 @@ flowchart LR
     G --> UC2
     G --> UC3
     G --> UC4
-    
-    A --> UC5
-    A --> UC6
-    A --> UC6
-    
-    UC3 -.->|includes| UC7
-    S --> UC7
+    G --> UC5
+    G --> UC6
+    G --> UC7
     
     %% Styles
     classDef actor fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#fff
     classDef usecase fill:#1e293b,stroke:#a855f7,stroke-width:2px,color:#fff,stroke-dasharray: 5 5
         `,
-        description: "A high-level view of the primary interactions between various actors and the core modules of the SmartStay app."
+        description: "Focuses exclusively on the interactions available to the regular Guest/Client on the frontend application."
+      },
+      "Admin Interface": {
+        title: "Administrator Use Cases",
+        code: `
+flowchart LR
+    %% Actors
+    A((Administrator)):::adminActor
+    
+    %% Use Cases
+    subgraph App [Admin Portal]
+        UC1([Login / Auth]):::usecase
+        UC2([View Dashboard Stats]):::usecase
+        UC3([Manage Rooms CRUD]):::usecase
+        UC4([Manage Bookings]):::usecase
+        UC5([Modify Event Halls]):::usecase
+        UC6([View Users]):::usecase
+        UC7([System Analytics]):::usecase
+    end
+    
+    %% Connections
+    A --> UC1
+    A -.->|Requires Auth| UC2
+    A -.->|Requires Auth| UC3
+    A -.->|Requires Auth| UC4
+    A -.->|Requires Auth| UC5
+    A -.->|Requires Auth| UC6
+    A -.->|Requires Auth| UC7
+    
+    %% Styles
+    classDef adminActor fill:#0f172a,stroke:#f87171,stroke-width:2px,color:#fff
+    classDef usecase fill:#1e293b,stroke:#a855f7,stroke-width:2px,color:#fff,stroke-dasharray: 5 5
+        `,
+        description: "Focuses exclusively on the high-level privileges and actions granted to Admin accounts within the protected portal."
+      },
+      "Stripe System": {
+        title: "Stripe Payment Gateway Use Cases",
+        code: `
+flowchart LR
+    %% Actors
+    S((Stripe API)):::stripeActor
+    B((SmartStay Backend)):::actor
+    
+    %% Use Cases
+    subgraph PaymentFlow [Payment Infrastructure]
+        UC1([Validate Card Details]):::usecase
+        UC2([Generate Payment Intent]):::usecase
+        UC3([Process Charge]):::usecase
+        UC4([Issue Refund]):::usecase
+        UC5([Send Webhook Events]):::usecase
+    end
+    
+    %% Connections
+    B -->|Requests intent| UC2
+    S -->|Performs| UC1
+    S -->|Executes| UC3
+    S -->|Fires| UC5
+    B -->|Receives| UC5
+    
+    %% Styles
+    classDef actor fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#fff
+    classDef stripeActor fill:#0f172a,stroke:#6366f1,stroke-width:2px,color:#fff
+    classDef usecase fill:#1e293b,stroke:#a855f7,stroke-width:2px,color:#fff,stroke-dasharray: 5 5
+        `,
+        description: "Focuses on the financial gateway interactions, detailing what Stripe is responsible for handling."
+      },
+      "AI Assistant": {
+        title: "AI Model (Gemini/ChatGPT) Use Cases",
+        code: `
+flowchart LR
+    %% Actors
+    AI((AI Model)):::aiActor
+    B((SmartStay Backend)):::actor
+    
+    %% Use Cases
+    subgraph AI Service [AI Customer Support]
+        UC1([Parse User Query]):::usecase
+        UC2([Identify Intent]):::usecase
+        UC3([Sort/Filter Rooms Request]):::usecase
+        UC4([Check Availability Request]):::usecase
+        UC5([Generate Natural Language Reply]):::usecase
+    end
+    
+    %% Connections
+    B -->|Sends Chat Prompt| UC1
+    AI -->|Processes| UC1
+    AI -->|Processes| UC2
+    AI -->|Executes Skill| UC3
+    AI -->|Executes Skill| UC4
+    AI -->|Returns Response| UC5
+    UC5 -->|JSON response| B
+    
+    %% Styles
+    classDef actor fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#fff
+    classDef aiActor fill:#0f172a,stroke:#10b981,stroke-width:2px,color:#fff
+    classDef usecase fill:#1e293b,stroke:#a855f7,stroke-width:2px,color:#fff,stroke-dasharray: 5 5
+        `,
+        description: "Focuses on the internal AI agent, defining its capabilities, intents, and NLP responsibilities."
       }
     },
     "Sequence Diagrams": {
