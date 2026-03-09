@@ -4,10 +4,12 @@ import { authAPI } from '@/lib/api'
 import { usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { useState } from 'react'
+import AdminDevMode from './AdminDevMode'
 
 export default function AdminNavbar() {
   const pathname = usePathname()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isDevModeOpen, setIsDevModeOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -91,6 +93,18 @@ export default function AdminNavbar() {
                 </svg>
                 Go to Website
              </Link>
+             
+             {/* Developer Tools Button (Desktop) */}
+             <button
+              onClick={() => setIsDevModeOpen(true)}
+              className="hidden sm:inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-sky-500 hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 transition-colors mr-4"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mr-1">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
+              </svg>
+              Dev Tools
+            </button>
+
              <button
               onClick={handleLogout}
               className="hidden sm:inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
@@ -159,7 +173,18 @@ export default function AdminNavbar() {
               </Link>
           </div>
           <div className="pt-4 pb-4 border-t border-gray-200">
-             <div className="px-4">
+             <div className="px-4 space-y-2">
+                {/* Developer Tools Button (Mobile) */}
+                <button
+                  onClick={() => setIsDevModeOpen(true)}
+                  className="flex items-center justify-center w-full text-center px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-sky-500 hover:bg-sky-600 shadow-sm"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mr-2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
+                  </svg>
+                  Developer Tools
+                </button>
+
                 <button
                   onClick={handleLogout}
                   className="block w-full text-center px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-red-600 hover:bg-red-700 shadow-sm"
@@ -170,6 +195,9 @@ export default function AdminNavbar() {
           </div>
         </div>
       )}
+
+      {/* Developer Dashboard Modal */}
+      <AdminDevMode isOpen={isDevModeOpen} onClose={() => setIsDevModeOpen(false)} />
     </motion.nav>
   )
 }

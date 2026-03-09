@@ -1,14 +1,11 @@
 "use client"
-import React, { useState } from 'react'
 import Link from 'next/link'
 import { authAPI } from '@/lib/api'
 import { usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
-import AdminDevMode from './AdminDevMode'
 
 export default function Sidebar() {
   const pathname = usePathname()
-  const [isDevModeOpen, setIsDevModeOpen] = useState(false)
 
   const handleLogout = async () => {
     try {
@@ -148,38 +145,6 @@ export default function Sidebar() {
           Logout
         </button>
       </div>
-      
-      {/* Admin Developer Tools Button */}
-      <div style={{ marginTop: '16px' }}>
-        <button 
-          onClick={() => setIsDevModeOpen(true)}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            width: '100%',
-            padding: '12px 16px',
-            backgroundColor: '#0ea5e9',
-            border: 'none',
-            color: '#fff',
-            cursor: 'pointer',
-            fontSize: '14px',
-            borderRadius: '12px',
-            transition: 'opacity 0.2s ease',
-            fontWeight: '600',
-            boxShadow: '0 4px 12px rgba(14, 165, 233, 0.2)'
-          }}
-          onMouseOver={(e) => e.target.style.opacity = '0.9'}
-          onMouseOut={(e) => e.target.style.opacity = '1'}
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
-          </svg>
-          Developer Tools
-        </button>
-      </div>
-
-      <AdminDevMode isOpen={isDevModeOpen} onClose={() => setIsDevModeOpen(false)} />
     </motion.div>
   )
 }
