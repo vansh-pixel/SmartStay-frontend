@@ -238,7 +238,7 @@ if (!API_BASE_URL || API_BASE_URL.includes('localhost')) {
   API_BASE_URL = isProd ? 'https://smartstay-backend-ibsr.onrender.com/api' : 'http://localhost:5000/api';
 }
 
-const API_TIMEOUT = 10000 
+const API_TIMEOUT = 60000; // Increased to 60s to account for Render free-tier cold starts
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
