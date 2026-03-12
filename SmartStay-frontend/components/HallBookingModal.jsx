@@ -316,6 +316,7 @@ export default function HallBookingModal({ isOpen, onClose, hall }) {
                           bookingData={bookingDataPayload} 
                           onSuccess={handlePaymentSuccess}
                           onSubmitApi={hallAPI.book}
+                          onError={(msg) => console.error("Event Payment Error:", msg)}
                         />
                       </Elements>
                     </div>

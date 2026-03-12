@@ -1099,6 +1099,7 @@ export default function RoomBookingModal({ isOpen, onClose, room }) {
                       bookingData={bookingData} 
                       onSuccess={handlePaymentSuccess}
                       onError={(msg) => setErrors({ payment: msg })}
+                      onSubmitApi={bookingAPI.create}
                     />
                   </Elements>
                 ) : (

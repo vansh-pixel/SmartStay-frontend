@@ -21,27 +21,106 @@ const getHallById = asyncHandler(async (req, res) => {
   }
 });
 
+const sendEmail = require('../utils/sendEmail');
+
 // @desc    Create an event booking
 // @route   POST /api/halls/book
 const createEventBooking = asyncHandler(async (req, res) => {
+  console.log("----------------------------------------------");
+  console.log("🔔 INCOMING EVENT BOOKING REQUEST:");
+  console.log("Body:", JSON.stringify(req.body, null, 2));
+
   const { hallId, eventDate, eventType, guestDetails, pricing } = req.body;
+
+  if (!hallId) {
+    res.status(400);
+    throw new Error('hallId is required');
+  }
+
+  if (!guestDetails || !guestDetails.email) {
+    res.status(400);
+    throw new Error('Guest email is required');
+  }
 
   const hall = await EventHall.findOne({ id: hallId });
   if (!hall) {
+    console.log(`❌ Hall with id ${hallId} not found`);
     res.status(404);
     throw new Error('Hall not found');
+  }
+  console.log("✅ Hall found:", hall.name);
+
+  // Check if already booked
+  const existingBooking = await EventBooking.findOne({
+    hall: hall._id,
+    eventDate: new Date(eventDate),
+    status: { $ne: 'cancelled' }
+  });
+
+  if (existingBooking) {
+    res.status(400);
+    throw new Error('Hall is already booked for this date');
   }
 
   const booking = await EventBooking.create({
     hall: hall._id,
-    user: req.user._id,
-    guestDetails,
+    user: req.user ? req.user._id : null, 
+    guestDetails: {
+      fullName: guestDetails.fullName,
+      email: guestDetails.email,
+      phone: guestDetails.phone || 'N/A'
+    },
     eventDate,
     eventType,
-    pricing
+    pricing: {
+      basePrice: pricing.basePrice || 0,
+      taxes: pricing.taxes || 0,
+      total: pricing.total
+    },
+    status: 'confirmed'
   });
 
-  res.status(201).json(booking);
+  console.log("🎉 Event Booking Created Successfully:", booking._id);
+
+  // 📧 Send Confirmation Email
+  try {
+    const emailMessage = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 10px; overflow: hidden;">
+        <div style="background-color: #f97316; padding: 20px; text-align: center; color: white;">
+          <h1>Event Confirmed!</h1>
+        </div>
+        <div style="padding: 20px;">
+          <p>Hi <strong>${guestDetails.fullName}</strong>,</p>
+          <p>Your booking for <strong>${hall.name}</strong> has been confirmed.</p>
+          <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
+            <p><strong>Booking ID:</strong> #${booking._id.toString().slice(-6).toUpperCase()}</p>
+            <p><strong>Date:</strong> ${new Date(eventDate).toLocaleDateString()}</p>
+            <p><strong>Event Type:</strong> ${eventType}</p>
+            <p><strong>Total Paid:</strong> ₹${(pricing.total || 0).toLocaleString()}</p>
+          </div>
+          <p>Thank you for choosing SmartStay for your special event!</p>
+        </div>
+        <div style="background-color: #333; padding: 15px; text-align: center; color: #ccc; font-size: 12px;">
+          SmartStay Hotel | Downtown City Center
+        </div>
+      </div>
+    `;
+
+    await sendEmail({
+      email: guestDetails.email,
+      subject: `Event Booking Confirmed #${booking._id.toString().slice(-6).toUpperCase()}`,
+      message: emailMessage
+    });
+    console.log(`📧 Event Confirmation Email sent to ${guestDetails.email}`);
+  } catch (emailErr) {
+    console.error("❌ Event Email sending failed:", emailErr.message);
+  }
+
+  res.status(201).json({
+    success: true,
+    bookingId: booking._id,
+    message: 'Event booking confirmed'
+  });
 });
 
 // @desc    Get user's event bookings

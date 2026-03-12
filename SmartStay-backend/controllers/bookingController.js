@@ -6,7 +6,7 @@ const createBooking = async (req, res) => {
   try {
     console.log("----------------------------------------------");
     console.log("🔔 INCOMING BOOKING REQUEST:");
-    console.log("Body:", req.body); 
+    console.log("Body:", JSON.stringify(req.body, null, 2)); 
 
     const {
       roomId,      
@@ -18,7 +18,18 @@ const createBooking = async (req, res) => {
 
     // 1. Validate Input
     if (!roomId) {
+      console.log("❌ Missing roomId in request body");
       return res.status(400).json({ message: "roomId is required" });
+    }
+
+    if (!guestDetails || !guestDetails.email || !guestDetails.fullName) {
+      console.log("❌ Missing critical guest details");
+      return res.status(400).json({ message: "Guest details (name, email) are required" });
+    }
+
+    if (!pricing || typeof pricing.total === 'undefined') {
+      console.log("❌ Missing pricing information");
+      return res.status(400).json({ message: "Pricing information is required" });
     }
 
     // FIX: Search for room by custom 'id' (String "1" or Number 1) or ObjectId
@@ -46,7 +57,7 @@ const createBooking = async (req, res) => {
     });
 
     if (existingBooking) {
-      console.log("❌ Room is already booked");
+      console.log("❌ Room is already booked for these dates");
       return res.status(400).json({ message: 'Room is already booked for these dates' });
     }
 
@@ -56,92 +67,59 @@ const createBooking = async (req, res) => {
     const booking = await Booking.create({
       room: room._id,
       user: userId,
-      guestDetails,
+      guestDetails: {
+        fullName: guestDetails.fullName,
+        email: guestDetails.email,
+        phone: guestDetails.phone || 'N/A',
+        adults: guestDetails.adults || 1,
+        children: guestDetails.children || 0,
+        specialRequests: guestDetails.specialRequests || ''
+      },
       checkIn,
       checkOut,
-      pricing,
+      pricing: {
+        basePrice: pricing.basePrice || 0,
+        nights: pricing.nights || 0,
+        serviceFee: pricing.serviceFee || 0,
+        taxes: pricing.taxes || 0,
+        total: pricing.total
+      },
       status: 'confirmed',
       paymentStatus: 'paid'
     });
 
-    console.log("🎉 Booking Created:", booking._id);
+    console.log("🎉 Booking Created Successfully:", booking._id);
 
-// ---------------------------------------------------------
     // 📧 4. SEND PROFESSIONAL INVOICE EMAIL
-    // ---------------------------------------------------------
     try {
       const emailMessage = `
         <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
-          
-          <!-- Header -->
           <div style="background-color: #ff6b35; padding: 30px; text-align: center;">
             <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">Booking Confirmed!</h1>
             <p style="color: #fff0eb; margin: 10px 0 0; font-size: 16px;">Thank you for choosing SmartStay</p>
           </div>
-
-          <!-- Content -->
           <div style="padding: 30px;">
             <p style="color: #333333; font-size: 16px; line-height: 1.6; margin-bottom: 25px;">
               Dear <strong>${guestDetails.fullName}</strong>,
             </p>
             <p style="color: #555555; font-size: 16px; line-height: 1.6; margin-bottom: 30px;">
-              Your reservation has been successfully confirmed. We're excited to host you! Below are your booking details and invoice.
+              Your reservation has been successfully confirmed. Below are your booking details.
             </p>
-
-            <!-- Invoice Box -->
             <div style="background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 25px;">
               <div style="border-bottom: 2px solid #e9ecef; padding-bottom: 15px; margin-bottom: 20px;">
                 <h3 style="color: #333333; margin: 0; font-size: 20px;">Receipt #${booking._id.toString().slice(-6).toUpperCase()}</h3>
                 <p style="color: #888888; margin: 5px 0 0; font-size: 14px;">Date: ${new Date().toLocaleDateString()}</p>
               </div>
-
               <table style="width: 100%; border-collapse: collapse;">
-                <tr>
-                  <td style="padding: 10px 0; color: #555555; font-weight: 600;">Room Type</td>
-                  <td style="padding: 10px 0; color: #333333; text-align: right;">${room.name}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 10px 0; color: #555555; font-weight: 600;">Check-in</td>
-                  <td style="padding: 10px 0; color: #333333; text-align: right;">${new Date(checkIn).toDateString()}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 10px 0; color: #555555; font-weight: 600;">Check-out</td>
-                  <td style="padding: 10px 0; color: #333333; text-align: right;">${new Date(checkOut).toDateString()}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 10px 0; color: #555555; font-weight: 600;">Nights</td>
-                  <td style="padding: 10px 0; color: #333333; text-align: right;">${pricing.nights}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 10px 0; color: #555555; font-weight: 600;">Guests</td>
-                  <td style="padding: 10px 0; color: #333333; text-align: right;">
-                    ${guestDetails.adults} Adults, ${guestDetails.children} Children
-                  </td>
-                </tr>
+                <tr><td style="padding: 8px 0;"><strong>Room</strong></td><td style="text-align: right;">${room.name}</td></tr>
+                <tr><td style="padding: 8px 0;"><strong>Check-in</strong></td><td style="text-align: right;">${new Date(checkIn).toDateString()}</td></tr>
+                <tr><td style="padding: 8px 0;"><strong>Check-out</strong></td><td style="text-align: right;">${new Date(checkOut).toDateString()}</td></tr>
+                <tr><td style="padding: 8px 0;"><strong>Total Paid</strong></td><td style="text-align: right; color: #ff6b35; font-weight: bold;">₹${(pricing.total || 0).toFixed(2)}</td></tr>
               </table>
-
-              <div style="border-top: 2px solid #e9ecef; margin-top: 20px; padding-top: 15px;">
-                <table style="width: 100%; border-collapse: collapse;">
-                   <tr>
-                    <td style="padding: 5px 0; color: #333333; font-weight: 700; font-size: 18px;">Total Paid</td>
-                      <td style="padding: 5px 0; color: #ff6b35; text-align: right; font-weight: 700; font-size: 20px;">
-                        ₹${pricing.total.toFixed(2)}
-                      </td>
-                  </tr>
-                </table>
-              </div>
             </div>
-            
             <div style="text-align: center; margin-top: 30px;">
-               <a href="http://localhost:3000/profile" style="background-color: #ff6b35; color: #ffffff; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: 600; display: inline-block;">View My Booking</a>
+               <a href="${process.env.CLIENT_URL || 'http://localhost:3000'}/profile" style="background-color: #ff6b35; color: #ffffff; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: 600; display: inline-block;">View My Booking</a>
             </div>
-
-          </div>
-
-          <!-- Footer -->
-          <div style="background-color: #333333; padding: 20px; text-align: center;">
-            <p style="color: #bbbbbb; margin: 0; font-size: 12px;">SmartStay Hotel Inc. | 123 Luxury Ave, City Center</p>
-            <p style="color: #bbbbbb; margin: 5px 0 0; font-size: 12px;">Questions? support@smartstay.com</p>
           </div>
         </div>
       `;
@@ -151,21 +129,19 @@ const createBooking = async (req, res) => {
         subject: `Booking Confirmed #${booking._id.toString().slice(-6).toUpperCase()} - SmartStay`,
         message: emailMessage
       });
-      
       console.log(`📧 Invoice Email sent to ${guestDetails.email}`);
     } catch (emailError) {
       console.error("❌ Email sending failed:", emailError.message);
     }
-    // ---------------------------------------------------------
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       bookingId: booking._id,
       message: 'Booking confirmed'
     });
 
   } catch (error) {
-    console.error("🔥 SERVER ERROR:", error);
+    console.error("🔥 SERVER ERROR IN CREATE BOOKING:", error);
     res.status(500).json({ message: error.message });
   }
 };
