@@ -21,23 +21,26 @@ const createPaymentIntent = async (req, res) => {
 
     const mongoose = require('mongoose');
     
-    // Try finding it as a String or Number custom ID
-    let room = await Room.findOne({ id: String(roomId) });
-    
-    if (!room && !isNaN(roomId)) {
-      console.log("⚠️ Not found as String, trying as Number...");
-      room = await Room.findOne({ id: Number(roomId) });
+    // 1. Try finding it as a MongoDB ObjectId first (most precise)
+    if (mongoose.Types.ObjectId.isValid(roomId)) {
+      console.log("🔍 Trying findById for roomId:", roomId);
+      room = await Room.findById(roomId);
     }
 
-    // Try finding it as a MongoDB ObjectId
-    if (!room && mongoose.Types.ObjectId.isValid(roomId)) {
-      console.log("⚠️ Not found as custom ID, trying as ObjectId...");
-      room = await Room.findById(roomId);
+    // 2. Try finding it as a String or Number custom ID
+    if (!room) {
+      console.log("🔍 Trying custom String id:", String(roomId));
+      room = await Room.findOne({ id: String(roomId) });
+    }
+    
+    if (!room && !isNaN(roomId)) {
+      console.log("🔍 Trying custom Number id:", Number(roomId));
+      room = await Room.findOne({ id: Number(roomId) });
     }
 
     if (!room) {
       console.log("❌ ERROR: Room definitely not found.");
-      return res.status(404).json({ message: "Room not found in database" });
+      return res.status(404).json({ message: "Room not found in database. Check if roomId is correct." });
     }
 
     console.log("✅ Room Matched:", room.name);
@@ -81,11 +84,25 @@ const createEventPaymentIntent = async (req, res) => {
     console.log("Incoming Request ID:", hallId);
 
     const EventHall = require('../models/EventHall');
-    const hall = await EventHall.findOne({ id: hallId });
+    const mongoose = require('mongoose');
+
+    let hall = null;
+
+    // 1. Try finding it as a MongoDB ObjectId first
+    if (mongoose.Types.ObjectId.isValid(hallId)) {
+      console.log("🔍 Trying findById for hallId:", hallId);
+      hall = await EventHall.findById(hallId);
+    }
+
+    // 2. Try finding it as a String custom ID
+    if (!hall) {
+      console.log("🔍 Trying custom String id:", String(hallId));
+      hall = await EventHall.findOne({ id: String(hallId) });
+    }
 
     if (!hall) {
       console.log("❌ ERROR: Hall not found.");
-      return res.status(404).json({ message: "Hall not found in database" });
+      return res.status(404).json({ message: "Hall not found in database. Check if hallId is correct." });
     }
 
     console.log("✅ Hall Matched:", hall.name);

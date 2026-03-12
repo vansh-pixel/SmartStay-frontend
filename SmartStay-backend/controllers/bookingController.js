@@ -372,6 +372,7 @@ const getBookedDates = async (req, res) => {
     }
     
     if (!room) {
+      console.log("❌ Room not found for availability check:", roomId);
       return res.status(404).json({ message: 'Room not found' });
     }
 

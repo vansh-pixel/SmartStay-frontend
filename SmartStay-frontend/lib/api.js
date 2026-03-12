@@ -240,6 +240,8 @@ if (!API_BASE_URL || API_BASE_URL.includes('localhost')) {
 
 const API_TIMEOUT = 60000; // Increased to 60s to account for Render free-tier cold starts
 
+console.log(`[API] Initializing with Base URL: ${API_BASE_URL}`);
+
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: API_TIMEOUT,
@@ -562,14 +564,14 @@ export const hallAPI = {
    ========================= */
 export const paymentAPI = {
   createPaymentIntent: async (roomId, nights) => {
-    const response = await apiClient.post('/checkout/create-payment-intent', {
+    const response = await apiClient.post('/payment/create-payment-intent', {
       roomId,
       nights
     })
     return response.data
   },
   createEventPaymentIntent: async (data) => {
-    const response = await apiClient.post('/checkout/create-event-payment-intent', data)
+    const response = await apiClient.post('/payment/create-event-payment-intent', data)
     return response.data
   }
 }

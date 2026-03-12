@@ -56,10 +56,20 @@ const getMyEventBookings = asyncHandler(async (req, res) => {
 const getBookedDates = asyncHandler(async (req, res) => {
   const { hallId } = req.params;
 
-  // Try finding hall by string ID
-  const hall = await EventHall.findOne({ id: hallId });
+  const mongoose = require('mongoose');
+  // 1. Try finding it as a MongoDB ObjectId first
+  let hall = null;
+  if (mongoose.Types.ObjectId.isValid(hallId)) {
+    hall = await EventHall.findById(hallId);
+  }
+
+  // 2. Try finding hall by string custom ID
+  if (!hall) {
+    hall = await EventHall.findOne({ id: String(hallId) });
+  }
   
   if (!hall) {
+    console.log("❌ Hall not found for availability check:", hallId);
     return res.status(404).json({ message: 'Hall not found' });
   }
 

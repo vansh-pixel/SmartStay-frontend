@@ -51,7 +51,8 @@ export default function HallBookingModal({ isOpen, onClose, hall }) {
 
   const fetchBookedDates = async () => {
     try {
-      const dates = await hallAPI.getBookedDates(hall.id)
+      const targetId = hall.id || hall._id;
+      const dates = await hallAPI.getBookedDates(targetId)
       setBookedDates(dates.map(d => new Date(d.eventDate)))
     } catch (error) {
       console.error("Failed to fetch booked dates:", error)
@@ -69,9 +70,10 @@ export default function HallBookingModal({ isOpen, onClose, hall }) {
     setLoading(true)
     
     try {
+      const targetId = hall.id || hall._id;
       // 1. Generate Stripe Payment Intent
       const intentData = await paymentAPI.createEventPaymentIntent({
-        hallId: hall.id,
+        hallId: targetId,
         pricePerDay: hall.pricePerDay
       })
       

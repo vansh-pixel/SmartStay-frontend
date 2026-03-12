@@ -197,12 +197,14 @@ export default function AdminBookingModal({ isOpen, onClose, onBookingCreated })
     if (!selectedRoom || !startDate || !endDate) return alert("Please select room and dates first.");
     if (totalPrice <= 0) return alert("Total price must be greater than ₹0.");
     
-    setLoading(true);
     try {
+      const room = rooms.find(r => r.id == selectedRoom) || rooms.find(r => r._id == selectedRoom);
+      const targetId = room ? (room.id || room._id) : selectedRoom;
+
       let nights = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
       if (nights === 0) nights = 1;
       
-      const { clientSecret } = await paymentAPI.createPaymentIntent(selectedRoom, nights);
+      const { clientSecret } = await paymentAPI.createPaymentIntent(targetId, nights);
       setClientSecret(clientSecret);
     } catch (error) {
       console.error("Stripe Init Failed:", error);

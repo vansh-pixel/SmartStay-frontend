@@ -83,10 +83,12 @@ export default function RoomBookingModal({ isOpen, onClose, room }) {
 
   // --- NEW: Fetch Booked Dates ---
   useEffect(() => {
-    if (isOpen && room && room.id) {
+    if (isOpen && room) {
       const fetchBookedDates = async () => {
         try {
-          const dates = await bookingAPI.getBookedDates(room.id);
+          // Use .id (custom) or ._id (MongoDB)
+          const targetId = room.id || room._id;
+          const dates = await bookingAPI.getBookedDates(targetId);
           setBookedDates(dates.map(d => ({
             checkIn: new Date(d.checkIn),
             checkOut: new Date(d.checkOut)
@@ -354,10 +356,12 @@ export default function RoomBookingModal({ isOpen, onClose, room }) {
     if (currentStep === 3 && !clientSecret && room) { // Check 'room' to ensure data exists
       const fetchSecret = async () => {
         try {
-          const data = await paymentAPI.createPaymentIntent(room.id, calculateNights())
+          const targetId = room.id || room._id;
+          const data = await paymentAPI.createPaymentIntent(targetId, calculateNights())
           setClientSecret(data.clientSecret)
         } catch (error) {
-          setErrors({ payment: "Failed to initialize payment. Please check connection." })
+          console.error("Payment Init Error:", error);
+          setErrors({ payment: "Failed to initialize payment: " + error.message })
         }
       }
       fetchSecret()
