@@ -37,7 +37,7 @@ export default function Footer() {
           <div className="footer-map-container">
             <iframe
               title="Ahmedabad Map"
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d117506.382824461!2d72.507625!3d23.012033!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x395e848aba5bd449%3A0x4fccddf610bb2fe2!2sAhmedabad%2C%20Gujarat!5e0!3m2!1sen!2sin!4v1710310000000!5m2!1sen!2sin"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d117506.382824461!2d72.507625!3d23.012033!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x395e848aba5bd449%3A0x4fccddf610bb2fe2!2sAhmedabad%2C%20Gujarat!5e1!3m2!1sen!2sin!4v1710310000000!5m2!1sen!2sin"
               width="100%"
               height="100%"
               style={{ border: 0 }}
@@ -86,7 +86,7 @@ export default function Footer() {
             <div className="map-modal-body">
               <iframe
                 title="Ahmedabad Map Large"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d117506.382824461!2d72.507625!3d23.012033!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x395e848aba5bd449%3A0x4fccddf610bb2fe2!2sAhmedabad%2C%20Gujarat!5e0!3m2!1sen!2sin!4v1710310000000!5m2!1sen!2sin"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d117506.382824461!2d72.507625!3d23.012033!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x395e848aba5bd449%3A0x4fccddf610bb2fe2!2sAhmedabad%2C%20Gujarat!5e1!3m2!1sen!2sin!4v1710310000000!5m2!1sen!2sin"
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}
