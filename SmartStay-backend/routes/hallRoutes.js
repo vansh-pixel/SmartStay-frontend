@@ -8,11 +8,11 @@ const {
   getBookedDates,
   updateEventBooking
 } = require('../controllers/hallController');
-const { protect, admin } = require('../middleware/authMiddleware'); // Assuming authMiddleware exists
+const { protect, admin, optionalAuth } = require('../middleware/authMiddleware'); // Assuming authMiddleware exists
 
 router.get('/', getHalls);
 router.get('/:id', getHallById);
-router.post('/book', protect, createEventBooking);
+router.post('/book', optionalAuth, createEventBooking);
 router.get('/my-bookings', protect, getMyEventBookings);
 router.get('/availability/:hallId', getBookedDates);
 router.put('/bookings/:id', protect, admin, updateEventBooking); // Admin Route

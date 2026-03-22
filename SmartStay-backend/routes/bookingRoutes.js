@@ -9,7 +9,7 @@ const {
   updateBooking,
   deleteBooking
 } = require('../controllers/bookingController');
-const { protect, admin } = require('../middleware/authMiddleware');
+const { protect, admin, optionalAuth } = require('../middleware/authMiddleware');
 
 // All booking routes should be protected (require login)
 
@@ -20,7 +20,7 @@ router.get('/availability/:roomId', getBookedDates);
 router.post('/manual-entry', protect, admin, createAdminBooking);
 
 // 1. Create a new booking
-router.post('/', protect, createBooking);
+router.post('/', optionalAuth, createBooking);
 
 // 2. Get logged-in user's bookings
 // (MUST be defined before /:id to avoid conflict)
